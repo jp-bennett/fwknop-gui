@@ -102,8 +102,8 @@ hFwTimeBox = new wxBoxSizer(wxHORIZONTAL);
 hInternalIPBox = new wxBoxSizer(wxHORIZONTAL);
 hInternalPortBox = new wxBoxSizer(wxHORIZONTAL);
 hServCmdBox = new wxBoxSizer(wxHORIZONTAL);
-initMessTypeEvent = new wxCommandEvent(wxEVT_CHOICE, ID_MessType);
-initAllowIPEvent = new wxCommandEvent(wxEVT_CHOICE, ID_AllowIP);
+initMessTypeEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_MessType);
+initAllowIPEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_AllowIP);
 configFile = new wxFileConfig (wxT("fwknop-gui"));
 ourConfigList = new wxArrayString;
 ourConfig = new Config;
@@ -331,13 +331,13 @@ void fwknop_guiFrame::OnSave(wxCommandEvent &event)
     ourConfig->SERVER_CMD = ServCmdTxt->GetLineText(0);
 
     wxString result = ourConfig->validateConfig();
-    if (result.CmpNoCase("valid") == 0)
+    if (result.CmpNoCase(wxT("valid")) == 0)
     {
         ourConfig->saveConfig(configFile);
         ourConfig->getAllConfigs(ourConfigList, configFile);
         listbox->Clear();
         listbox->InsertItems(*ourConfigList,0);
-        wxMessageBox("Save Successful.");
+        wxMessageBox(_("Save Successful."));
     } else {
         wxMessageBox(result);
 
@@ -396,11 +396,11 @@ void fwknop_guiFrame::OnLoad(wxCommandEvent &event)
     ServAddrTxt->ChangeValue(ourConfig->SERVER_IP);
     LegacyChk->SetValue(ourConfig->LEGACY);
     ServPortTxt->SetValue(ourConfig->SERVER_PORT);
-    if (ourConfig->PROTOCOL.CmpNoCase("UDP") == 0)
+    if (ourConfig->PROTOCOL.CmpNoCase(wxT("UDP")) == 0)
         ProtoChoice->SetSelection(0);
-    else if (ourConfig->PROTOCOL.CmpNoCase("TCP") == 0)
+    else if (ourConfig->PROTOCOL.CmpNoCase(wxT("TCP")) == 0)
         ProtoChoice->SetSelection(1);
-    else if (ourConfig->PROTOCOL.CmpNoCase("HTTP") == 0)
+    else if (ourConfig->PROTOCOL.CmpNoCase(wxT("HTTP")) == 0)
         ProtoChoice->SetSelection(2);
 
     KeyTxt->SetValue(ourConfig->KEY);
@@ -408,20 +408,20 @@ void fwknop_guiFrame::OnLoad(wxCommandEvent &event)
     HmacKeyTxt->SetValue(ourConfig->HMAC);
     HmacKeyB64Chk->SetValue(ourConfig->HMAC_BASE64);
 
-    if (ourConfig->ACCESS_IP.CmpNoCase("Resolve IP") == 0)
+    if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) == 0)
         AllowIPChoice->SetSelection(0);
-    else if (ourConfig->ACCESS_IP.CmpNoCase("Source IP") == 0)
+    else if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Source IP")) == 0)
         AllowIPChoice->SetSelection(1);
     else {
         AllowIPChoice->SetSelection(2);
         IPToAllowTxt->SetValue(ourConfig->ACCESS_IP);
     }
 
-    if (ourConfig->MESS_TYPE.CmpNoCase("Open Port") == 0)
+    if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Open Port")) == 0)
         MessTypeChoice->SetSelection(0);
-    else if (ourConfig->MESS_TYPE.CmpNoCase("Nat Access") == 0)
+    else if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Nat Access")) == 0)
         MessTypeChoice->SetSelection(1);
-    else if (ourConfig->MESS_TYPE.CmpNoCase("Server Command") == 0)
+    else if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Server Command")) == 0)
         MessTypeChoice->SetSelection(2);
 
     AccessPortsTxt->SetValue(ourConfig->PORTS);
@@ -447,26 +447,26 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 
     memset(&opts, 0, sizeof(fwknop_options_t));
 
-    if (ourConfig->KEY.CmpNoCase("") == 0)
-    ourConfig->KEY = wxGetTextFromUser("Please enter your Rijndael key");
+    if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
+    ourConfig->KEY = wxGetTextFromUser(_("Please enter your Rijndael key"));
 
-    if (ourConfig->KEY.CmpNoCase("") == 0)
+    if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
         return;
-    if (ourConfig->SERVER_PORT.CmpNoCase("random") == 0)
+    if (ourConfig->SERVER_PORT.CmpNoCase(wxT("random")) == 0)
     {
         srand((int)wxGetLocalTime());
-        ourConfig->SERVER_PORT = "";
+        ourConfig->SERVER_PORT = wxEmptyString;
         ourConfig->SERVER_PORT << (rand()%55535 + 10000); // do this better
     }
-    if (ourConfig->ACCESS_IP.CmpNoCase("Source IP") == 0)
-        ourConfig->ACCESS_IP = "0.0.0.0";
-    else if (ourConfig->ACCESS_IP.CmpNoCase("Resolve IP") == 0)
+    if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Source IP")) == 0)
+        ourConfig->ACCESS_IP = wxT("0.0.0.0");
+    else if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) == 0)
     {
         wxHTTP get;
         get.SetHeader(_T("Content-type"), _T("text/html; charset=utf-8"));
         get.SetTimeout(10); // 10 seconds of timeout instead of 10 minutes ...
-        get.Connect("whatismyip.akamai.com");
-        wxInputStream *httpStream = get.GetInputStream("/");
+        get.Connect(wxT("whatismyip.akamai.com"));
+        wxInputStream *httpStream = get.GetInputStream(wxT("/"));
         if (get.GetError() == wxPROTO_NOERR)
         {
             wxString res;
@@ -478,7 +478,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
         }
         else
         {
-            wxMessageBox("Unable to resolve our IP!");
+            wxMessageBox(_("Unable to resolve our IP!"));
             wxDELETE(httpStream);
             get.Close();
             return;
@@ -487,7 +487,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 
     if (ourConfig->KEY_BASE64)
     {
-        key_len = fko_base64_decode(ourConfig->KEY, (unsigned char *)key_str);
+        key_len = fko_base64_decode(ourConfig->KEY.mb_str(), (unsigned char *)key_str);
     } else {
         strncpy(key_str, (const char*)ourConfig->KEY.mb_str(wxConvUTF8), 128);
         key_len = (int)strlen(key_str);
@@ -495,7 +495,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 
     if (ourConfig->HMAC_BASE64)
     {
-        hmac_str_len = fko_base64_decode(ourConfig->HMAC, (unsigned char *)hmac_str);
+        hmac_str_len = fko_base64_decode(ourConfig->HMAC.mb_str(), (unsigned char *)hmac_str);
     } else {
         strncpy(hmac_str, (const char*)ourConfig->HMAC.mb_str(wxConvUTF8), 128);
         hmac_str_len = (int)strlen(hmac_str);
@@ -503,11 +503,11 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 
     res = fko_new(&ctx);
 
-    if (ourConfig->SERVER_CMD.CmpNoCase("") != 0)
+    if (ourConfig->SERVER_CMD.CmpNoCase(wxEmptyString) != 0)
     {
     message_type = FKO_COMMAND_MSG;
     fko_set_spa_message_type(ctx, message_type);
-    res = fko_set_spa_message(ctx, ourConfig->SERVER_CMD);
+    res = fko_set_spa_message(ctx, ourConfig->SERVER_CMD.mb_str());
 
     } else {
 
@@ -523,10 +523,10 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     if (ourConfig->LEGACY)
         fko_set_spa_encryption_mode(ctx, FKO_ENC_MODE_CBC_LEGACY_IV);
 
-    if (ourConfig->HMAC.CmpNoCase("") != 0)
+    if (ourConfig->HMAC.CmpNoCase(wxEmptyString) != 0)
         fko_set_spa_hmac_type(ctx, FKO_DEFAULT_HMAC_MODE);
 
-    if (ourConfig->NAT_IP.CmpNoCase("") != 0)
+    if (ourConfig->NAT_IP.CmpNoCase(wxEmptyString) != 0)
     {
         sprintf(nat_access_str, "%s,%s", (const char*)ourConfig->NAT_IP.mb_str(wxConvUTF8), (const char*)ourConfig->NAT_PORT.mb_str(wxConvUTF8));
         res = fko_set_spa_nat_access(ctx, nat_access_str);
@@ -535,11 +535,11 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 
     fko_spa_data_final(ctx, key_str, key_len, hmac_str, hmac_str_len);
      res = fko_get_spa_data(ctx, &opts.spa_data);
-     ourConfig->SPA_STRING = opts.spa_data;
+     ourConfig->SPA_STRING = wxString::FromUTF8(opts.spa_data);
 
 
      //if udp, and then implement tcp and http
-    if (ourConfig->PROTOCOL.CmpNoCase("UDP") == 0)
+    if (ourConfig->PROTOCOL.CmpNoCase(wxT("UDP")) == 0)
     {
         wxIPV4address serverAddr;
         wxIPV4address ourAddr;
@@ -553,7 +553,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
         m_socket->WaitForWrite();
         m_socket->Destroy();
     } else
-        wxMessageBox("Not implemented yet");
+        wxMessageBox(_("Not implemented yet"));
 
 }
 
