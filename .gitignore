@@ -1,0 +1,4 @@
+# Ignore build directories
+build*
+bin
+obj
