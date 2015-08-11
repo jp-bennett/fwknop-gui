@@ -13,10 +13,10 @@ if(NOT(DEFINED IS_WIN32 OR DEFINED IS_LINUX OR DEFINED IS_APPLE))
   endif()
 endif()
 
-if(WIN32)
+if (IS_WIN32)
+  set(SRCS ${SRCS} minimal.rc)
   set( wxWidgets_USE_STATIC ON)
 endif()
-
 find_package(wxWidgets 2.8.10 REQUIRED xml html adv qa richtext net core base)
 
 include(${wxWidgets_USE_FILE})
@@ -35,6 +35,6 @@ add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
 # This assumes libfko is installed and devel packages in the standard location.
 # That really should have a proper library check.
 target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} fko)
-if(WIN32)
+if(IS_WIN32)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -static")
 endif()
