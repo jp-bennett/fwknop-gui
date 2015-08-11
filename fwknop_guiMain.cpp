@@ -549,7 +549,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
         serverAddr.Service(ourConfig->SERVER_PORT);
         wxDatagramSocket *m_socket;
         m_socket = new wxDatagramSocket(ourAddr, wxSOCKET_NOWAIT);
-        m_socket->SendTo(serverAddr, ourConfig->SPA_STRING, ourConfig->SPA_STRING.Len());
+        m_socket->SendTo(serverAddr, ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
         m_socket->WaitForWrite();
         m_socket->Destroy();
     } else
