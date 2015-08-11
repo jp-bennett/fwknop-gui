@@ -1,5 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(fwknop-gui CXX C)
+set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
 set(CMAKE_OSX_ARCHITECTURES i386)
 
@@ -22,6 +23,9 @@ find_package(wxWidgets 2.8.10 REQUIRED xml html adv qa richtext net core base)
 include(${wxWidgets_USE_FILE})
 include_directories(${CMAKE_SOURCE_DIR})
 
+find_package(LibFko REQUIRED)
+
+
 set(CODE_FILES
   configs.cpp
   fwknop_guiApp.cpp
@@ -34,6 +38,7 @@ add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
 
 # This assumes libfko is installed and devel packages in the standard location.
 # That really should have a proper library check.
+
 target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} fko)
 if(IS_WIN32)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -static")
