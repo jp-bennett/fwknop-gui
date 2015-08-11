@@ -539,8 +539,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 
 
      //if udp, and then implement tcp and http
-    if (ourConfig->PROTOCOL.CmpNoCase(wxT("UDP")) == 0)
-    {
+    if (ourConfig->PROTOCOL.CmpNoCase(wxT("UDP")) == 0) {
         wxIPV4address serverAddr;
         wxIPV4address ourAddr;
         ourAddr.AnyAddress();
@@ -552,6 +551,29 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
         m_socket->SendTo(serverAddr, ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
         m_socket->WaitForWrite();
         m_socket->Destroy();
+    } else if (ourConfig->PROTOCOL.CmpNoCase(wxT("TCP")) == 0) {
+        wxIPV4address tcp_serverAddr;
+        wxIPV4address ourAddr;
+        ourAddr.AnyAddress();
+        ourAddr.Service(0);
+        tcp_serverAddr.Hostname(ourConfig->SERVER_IP);
+        tcp_serverAddr.Service(ourConfig->SERVER_PORT);
+        wxSocketClient *tcp_socket = new wxSocketClient;
+        tcp_socket->Connect(tcp_serverAddr);
+        tcp_socket->WaitForWrite();
+        tcp_socket->Write(ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
+        tcp_socket->WaitForWrite();
+        tcp_socket->Destroy();
+
+
+    } else if (ourConfig->PROTOCOL.CmpNoCase(wxT("HTTP")) == 0) {
+    wxHTTP *http_serv = new wxHTTP;
+    http_serv->Connect(ourConfig->SERVER_IP, wxAtoi(ourConfig->SERVER_PORT));
+    wxInputStream *tmp_stream;
+    tmp_stream = http_serv->GetInputStream(ourConfig->SPA_STRING);
+    delete tmp_stream;
+    http_serv->Destroy();
+
     } else
         wxMessageBox(_("Not implemented yet"));
 

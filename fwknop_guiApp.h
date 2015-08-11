@@ -21,6 +21,7 @@
 #include "configs.h"
 #include <wx/sstream.h>
 #include <wx/protocol/http.h>
+#include <wx/stream.h>
 
 class fwknop_guiApp : public wxApp
 {
