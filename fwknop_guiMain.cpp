@@ -440,13 +440,14 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     {								//possibly use regex to search for ip in http
 
         curl_global_init(CURL_GLOBAL_DEFAULT);
+        CURLcode res_curl;
 
         std::ostringstream oss;
-	if(CURLE_OK == curl_read("https://api.ipify.org", oss))
+	res_curl = curl_read("https://api.ipify.org", oss);
+	if (res_curl == CURLE_OK)
 	{
 		// Web page successfully written to string
 		wxString result_tmp = wxString::FromUTF8(oss.str().c_str());
-		//wxMessageBox(result_tmp);
 		wxRegEx findIP( wxT("^(([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])$"));
 		if (!findIP.Matches(result_tmp))
 		{
@@ -455,9 +456,9 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
             return;
 		}
 		ourConfig->ACCESS_IP =findIP.GetMatch(result_tmp);
-		//wxMessageBox(ourConfig->ACCESS_IP);
+		wxMessageBox(ourConfig->ACCESS_IP);
 	} else {
-        wxMessageBox(_("Unable to resolve our IP!"));
+        wxMessageBox(wxString::FromUTF8(curl_easy_strerror(res_curl)));
         curl_global_cleanup();
         return;
             }
@@ -684,11 +685,15 @@ CURLcode curl_read(const std::string& url, std::ostream& os, long timeout)
 		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L))
 		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_FILE, &os))
 		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout))
+		#ifdef __WIN32__
+		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_CAINFO, "./ca-bundle.crt"))
+		#endif
 		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_URL, url.c_str())))
+
 		{
 			code = curl_easy_perform(curl);
 		}
 		curl_easy_cleanup(curl);
-	}
+	} else
 	return code;
 }
