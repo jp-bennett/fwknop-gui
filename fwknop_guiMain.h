@@ -96,4 +96,5 @@ class fwknop_guiFrame: public wxFrame
 };
 
 
+
 #endif // FWKNOP_GUIMAIN_H

@@ -22,6 +22,9 @@
 #include <wx/sstream.h>
 #include <wx/protocol/http.h>
 #include <wx/stream.h>
+#include <curl/curl.h>
+#include <curl/easy.h>
+#include <sstream>
 
 class fwknop_guiApp : public wxApp
 {
