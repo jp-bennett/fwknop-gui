@@ -30,4 +30,5 @@ class Config
         wxString validateConfig();
         void saveConfig(wxFileConfig *configFile);
         void loadConfig(wxString Nick, wxFileConfig *configFile);
+        void defaultConfig();
 };

@@ -48,6 +48,8 @@ wxString wxbuildinfo(wxbuildinfoformat format)
 BEGIN_EVENT_TABLE(fwknop_guiFrame, wxFrame)
     EVT_CLOSE(fwknop_guiFrame::OnClose)
     EVT_MENU(idMenuQuit, fwknop_guiFrame::OnQuit)
+    EVT_MENU(idMenuNew, fwknop_guiFrame::OnNew)
+    EVT_MENU(idMenuDelete, fwknop_guiFrame::OnDelete)
     EVT_MENU(idMenuAbout, fwknop_guiFrame::OnAbout)
     EVT_CHOICE(ID_AllowIP, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_MessType, fwknop_guiFrame::OnChoice)
@@ -64,6 +66,8 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
     wxMenuBar* mbar = new wxMenuBar();
     wxMenu* fileMenu = new wxMenu(_T(""));
     fileMenu->Append(idMenuQuit, _("&Quit\tAlt-F4"), _("Quit the application"));
+    fileMenu->Append(idMenuNew, _("&New Config"));
+    fileMenu->Append(idMenuDelete, _("&Delete Config"));
     mbar->Append(fileMenu, _("&File"));
 
     wxMenu* helpMenu = new wxMenu(_T(""));
@@ -394,52 +398,19 @@ hbox->Layout();
 void fwknop_guiFrame::OnLoad(wxCommandEvent &event)
 {
     ourConfig->loadConfig(listbox->GetString(listbox->GetSelection()), configFile);
-    NickTxt->ChangeValue(ourConfig->NICK_NAME);
-    ServAddrTxt->ChangeValue(ourConfig->SERVER_IP);
-    LegacyChk->SetValue(ourConfig->LEGACY);
-    ServPortTxt->SetValue(ourConfig->SERVER_PORT);
-    if (ourConfig->PROTOCOL.CmpNoCase(wxT("UDP")) == 0)
-        ProtoChoice->SetSelection(0);
-    else if (ourConfig->PROTOCOL.CmpNoCase(wxT("TCP")) == 0)
-        ProtoChoice->SetSelection(1);
-    else if (ourConfig->PROTOCOL.CmpNoCase(wxT("HTTP")) == 0)
-        ProtoChoice->SetSelection(2);
-
-    KeyTxt->SetValue(ourConfig->KEY);
-    KeyB64Chk->SetValue(ourConfig->KEY_BASE64);
-    HmacKeyTxt->SetValue(ourConfig->HMAC);
-    HmacKeyB64Chk->SetValue(ourConfig->HMAC_BASE64);
-
-    if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) == 0)
-        AllowIPChoice->SetSelection(0);
-    else if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Source IP")) == 0)
-        AllowIPChoice->SetSelection(1);
-    else {
-        AllowIPChoice->SetSelection(2);
-        IPToAllowTxt->SetValue(ourConfig->ACCESS_IP);
-    }
-
-    if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Open Port")) == 0)
-        MessTypeChoice->SetSelection(0);
-    else if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Nat Access")) == 0)
-        MessTypeChoice->SetSelection(1);
-    else if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Server Command")) == 0)
-        MessTypeChoice->SetSelection(2);
-
-    AccessPortsTxt->SetValue(ourConfig->PORTS);
-    FwTimeTxt->SetValue(ourConfig->SERVER_TIMEOUT);
-    InternalIPTxt->SetValue(ourConfig->NAT_IP);
-    InternalPortTxt->SetValue(ourConfig->NAT_PORT);
-    ServCmdTxt->SetValue(ourConfig->SERVER_CMD);
-    OnChoice(*initMessTypeEvent);
-    OnChoice(*initAllowIPEvent);
+    this->populate();
 }
 
 void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 {
+    if (listbox->GetSelection() == wxNOT_FOUND)
+    {
+    wxMessageBox(_("No config selected!"));
+    return;
+    }
     fko_ctx_t ctx;
     fwknop_options_t opts;
-    int key_len, hmac_key_len;
+    int key_len;
     int res, hmac_str_len = 0;
     ourConfig->loadConfig(listbox->GetString(listbox->GetSelection()), configFile);
     short message_type = FKO_CLIENT_TIMEOUT_NAT_ACCESS_MSG;
@@ -569,12 +540,12 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 
 
     } else if (ourConfig->PROTOCOL.CmpNoCase(wxT("HTTP")) == 0) {
-    wxHTTP *http_serv = new wxHTTP;
-    http_serv->Connect(ourConfig->SERVER_IP, wxAtoi(ourConfig->SERVER_PORT));
-    wxInputStream *tmp_stream;
-    tmp_stream = http_serv->GetInputStream(ourConfig->SPA_STRING);
-    delete tmp_stream;
-    http_serv->Destroy();
+        wxHTTP *http_serv = new wxHTTP;
+        http_serv->Connect(ourConfig->SERVER_IP, wxAtoi(ourConfig->SERVER_PORT));
+        wxInputStream *tmp_stream;
+        tmp_stream = http_serv->GetInputStream(ourConfig->SPA_STRING);
+        delete tmp_stream;
+        http_serv->Destroy();
 
     } else
         wxMessageBox(_("Not implemented yet"));
@@ -585,6 +556,35 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 fwknop_guiFrame::~fwknop_guiFrame()
 {
 
+}
+
+void fwknop_guiFrame::OnNew(wxCommandEvent &event)
+{
+listbox->SetSelection(wxNOT_FOUND);
+ourConfig->defaultConfig();
+this->populate();
+
+}
+
+void fwknop_guiFrame::OnDelete(wxCommandEvent &event)
+{
+    if (listbox->GetSelection() == wxNOT_FOUND)
+    {
+        wxMessageBox(_("No config selected!"));
+        return;
+    }
+    if (wxMessageBox(_("Are you sure you want to delete '") + listbox->GetString(listbox->GetSelection()) + _("'"),
+        _("Delete saved knock"), wxYES_NO) == wxYES)
+        {
+            configFile->SetPath(wxT("/"));
+            configFile->DeleteGroup(listbox->GetString(listbox->GetSelection()));
+            configFile->Flush();
+            listbox->Delete(listbox->GetSelection());
+            listbox->SetSelection(wxNOT_FOUND);
+            ourConfig->defaultConfig();
+            this->populate();
+
+        }
 }
 
 void fwknop_guiFrame::OnClose(wxCloseEvent &event)
@@ -601,4 +601,51 @@ void fwknop_guiFrame::OnAbout(wxCommandEvent &event)
 {
     wxString msg = wxbuildinfo(long_f);
     wxMessageBox(msg, _("Welcome to..."));
+}
+
+
+
+void fwknop_guiFrame::populate()
+{
+
+    NickTxt->ChangeValue(ourConfig->NICK_NAME);
+    ServAddrTxt->ChangeValue(ourConfig->SERVER_IP);
+    LegacyChk->SetValue(ourConfig->LEGACY);
+    ServPortTxt->SetValue(ourConfig->SERVER_PORT);
+    if (ourConfig->PROTOCOL.CmpNoCase(wxT("UDP")) == 0)
+        ProtoChoice->SetSelection(0);
+    else if (ourConfig->PROTOCOL.CmpNoCase(wxT("TCP")) == 0)
+        ProtoChoice->SetSelection(1);
+    else if (ourConfig->PROTOCOL.CmpNoCase(wxT("HTTP")) == 0)
+        ProtoChoice->SetSelection(2);
+
+    KeyTxt->SetValue(ourConfig->KEY);
+    KeyB64Chk->SetValue(ourConfig->KEY_BASE64);
+    HmacKeyTxt->SetValue(ourConfig->HMAC);
+    HmacKeyB64Chk->SetValue(ourConfig->HMAC_BASE64);
+
+    if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) == 0)
+        AllowIPChoice->SetSelection(0);
+    else if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Source IP")) == 0)
+        AllowIPChoice->SetSelection(1);
+    else {
+        AllowIPChoice->SetSelection(2);
+        IPToAllowTxt->SetValue(ourConfig->ACCESS_IP);
+    }
+
+    if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Open Port")) == 0)
+        MessTypeChoice->SetSelection(0);
+    else if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Nat Access")) == 0)
+        MessTypeChoice->SetSelection(1);
+    else if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Server Command")) == 0)
+        MessTypeChoice->SetSelection(2);
+
+    AccessPortsTxt->SetValue(ourConfig->PORTS);
+    FwTimeTxt->SetValue(ourConfig->SERVER_TIMEOUT);
+    InternalIPTxt->SetValue(ourConfig->NAT_IP);
+    InternalPortTxt->SetValue(ourConfig->NAT_PORT);
+    ServCmdTxt->SetValue(ourConfig->SERVER_CMD);
+    OnChoice(*initMessTypeEvent);
+    OnChoice(*initAllowIPEvent);
+
 }

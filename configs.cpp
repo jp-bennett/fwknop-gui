@@ -99,3 +99,25 @@ void Config::loadConfig(wxString Nick, wxFileConfig *configFile)
 
 
 }
+
+void Config::defaultConfig()
+{
+
+    this->NICK_NAME = wxEmptyString;
+    this->SERVER_IP = wxEmptyString;
+    this->LEGACY = false;
+    this->SERVER_PORT = wxT("62201");
+    this->PROTOCOL = wxT("UDP");
+    this->KEY = wxEmptyString;
+    this->KEY_BASE64 = false;
+    this->HMAC = wxEmptyString;
+    this->HMAC_BASE64 = false;
+    this->MESS_TYPE = wxT("Open Port");
+    this->ACCESS_IP = wxT("Resolve IP");
+    this->PORTS = wxT("tcp/22");
+    this->SERVER_TIMEOUT = wxT("60");
+    this->NAT_IP = wxEmptyString;
+    this->NAT_PORT = wxEmptyString;
+    this->SERVER_CMD = wxEmptyString;
+
+}

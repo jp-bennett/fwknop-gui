@@ -74,14 +74,19 @@ class fwknop_guiFrame: public wxFrame
         {
             idMenuQuit = 1000,
             idMenuAbout,
+            idMenuNew,
+            idMenuDelete,
             ID_AllowIP,
             ID_MessType,
             ID_SaveButton,
             ID_List,
             ID_KnockButton
         };
+        void populate();
         void OnClose(wxCloseEvent& event);
         void OnQuit(wxCommandEvent& event);
+        void OnNew(wxCommandEvent& event);
+        void OnDelete(wxCommandEvent& event);
         void OnAbout(wxCommandEvent& event);
         void OnChoice(wxCommandEvent& event);
         void OnSave(wxCommandEvent& event);
