@@ -443,7 +443,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
         CURLcode res_curl;
 
         std::ostringstream oss;
-	res_curl = curl_read("https://api.ipify.org", oss);
+        res_curl = curl_read("https://api.ipify.org", oss);
 	if (res_curl == CURLE_OK)
 	{
 		// Web page successfully written to string
@@ -456,7 +456,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
             return;
 		}
 		ourConfig->ACCESS_IP =findIP.GetMatch(result_tmp);
-		wxMessageBox(ourConfig->ACCESS_IP);
+		//wxMessageBox(ourConfig->ACCESS_IP);
 	} else {
         wxMessageBox(wxString::FromUTF8(curl_easy_strerror(res_curl)));
         curl_global_cleanup();
