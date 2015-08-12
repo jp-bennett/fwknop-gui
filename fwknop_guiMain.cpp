@@ -79,6 +79,8 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
 
 //wxPanel *configPanel = new wxPanel(this, wxID_ANY);
 
+wxColour *BackGround = new wxColour(233,233,233);
+this->SetBackgroundColour(*BackGround);
 
 hbox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *vListBox = new wxBoxSizer(wxVERTICAL);

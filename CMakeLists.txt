@@ -15,9 +15,10 @@ if(NOT(DEFINED IS_WIN32 OR DEFINED IS_LINUX OR DEFINED IS_APPLE))
 endif()
 
 if (IS_WIN32)
-  set(SRCS ${SRCS} minimal.rc)
   set( wxWidgets_USE_STATIC ON)
+  set(CODE_FILES win32/minimal.rc)
 endif()
+
 find_package(wxWidgets 2.8.10 REQUIRED xml html adv qa richtext net core base)
 
 include(${wxWidgets_USE_FILE})
@@ -26,7 +27,8 @@ include_directories(${CMAKE_SOURCE_DIR})
 find_package(LibFko REQUIRED)
 
 
-set(CODE_FILES
+set(CODE_FILES 
+  ${CODE_FILES}
   configs.cpp
   fwknop_guiApp.cpp
   fwknop_guiMain.cpp
