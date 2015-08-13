@@ -83,7 +83,7 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
 
 
 //wxPanel *configPanel = new wxPanel(this, wxID_ANY);
-
+curl_global_init(CURL_GLOBAL_DEFAULT);
 wxColour *BackGround = new wxColour(233,233,233);
 this->SetBackgroundColour(*BackGround);
 
@@ -439,12 +439,9 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     else if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) == 0) // use wxExecute nslookup myip.opendns.com 208.67.222.222
     {								//possibly use regex to search for ip in http
 
-        curl_global_init(CURL_GLOBAL_DEFAULT);
-        CURLcode res_curl;
-
         std::ostringstream oss;
-        res_curl = curl_read("https://api.ipify.org", oss);
-	if (res_curl == CURLE_OK)
+        curl_Res = curl_read("https://api.ipify.org", oss);
+	if (curl_Res == CURLE_OK)
 	{
 		// Web page successfully written to string
 		wxString result_tmp = wxString::FromUTF8(oss.str().c_str());
@@ -452,14 +449,14 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 		if (!findIP.Matches(result_tmp))
 		{
             wxMessageBox(_("Unable to resolve our IP!"));
-            curl_global_cleanup();
+
             return;
 		}
 		ourConfig->ACCESS_IP =findIP.GetMatch(result_tmp);
 		//wxMessageBox(ourConfig->ACCESS_IP);
 	} else {
-        wxMessageBox(wxString::FromUTF8(curl_easy_strerror(res_curl)));
-        curl_global_cleanup();
+        wxMessageBox(wxString::FromUTF8(curl_easy_strerror(curl_Res)));
+
         return;
             }
         }
@@ -595,11 +592,13 @@ void fwknop_guiFrame::OnDelete(wxCommandEvent &event)
 
 void fwknop_guiFrame::OnClose(wxCloseEvent &event)
 {
+curl_global_cleanup();
     Destroy();
 }
 
 void fwknop_guiFrame::OnQuit(wxCommandEvent &event)
 {
+curl_global_cleanup();
     Destroy();
 }
 
