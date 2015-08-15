@@ -2,8 +2,6 @@ cmake_minimum_required(VERSION 2.8)
 project(fwknop-gui CXX C)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
 
-set(CMAKE_OSX_ARCHITECTURES i386)
-
 if(NOT(DEFINED IS_WIN32 OR DEFINED IS_LINUX OR DEFINED IS_APPLE))
   if(WIN32)
     set(IS_WIN32 TRUE)

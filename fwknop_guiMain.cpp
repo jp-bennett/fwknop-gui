@@ -693,6 +693,6 @@ CURLcode curl_read(const std::string& url, std::ostream& os, long timeout)
 			code = curl_easy_perform(curl);
 		}
 		curl_easy_cleanup(curl);
-	} else
+	}
 	return code;
 }
