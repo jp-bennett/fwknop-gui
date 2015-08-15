@@ -455,7 +455,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 		ourConfig->ACCESS_IP =findIP.GetMatch(result_tmp);
 		//wxMessageBox(ourConfig->ACCESS_IP);
 	} else {
-        wxMessageBox(wxString::FromUTF8(curl_easy_strerror(curl_Res)));
+        wxMessageBox(_("Libcurl returned the error: ") + wxString::FromUTF8(curl_easy_strerror(curl_Res)));
 
         return;
             }
