@@ -1,7 +1,6 @@
 cmake_minimum_required(VERSION 2.8)
 project(fwknop-gui CXX C)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
-
 if(NOT(DEFINED IS_WIN32 OR DEFINED IS_LINUX OR DEFINED IS_APPLE))
   if(WIN32)
     set(IS_WIN32 TRUE)
@@ -37,7 +36,8 @@ add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
   ${CODE_FILES}
   )
 
-target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} fko curl)
+
+target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES})
 if(IS_WIN32)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -static")
 endif()
