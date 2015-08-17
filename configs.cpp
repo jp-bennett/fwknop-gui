@@ -1,4 +1,5 @@
 #include "configs.h"
+CURLcode curl_read(const std::string& url, std::ostream& os, long timeout = 30);
 
 void Config::getAllConfigs(wxArrayString * configs, wxFileConfig *configFile)
 {
@@ -26,29 +27,32 @@ configs->Sort();
 wxString Config::validateConfig()
 {
     wxIPV4address *ipValidate = new wxIPV4address;
+    wxRegEx findIP( wxT("^(([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])$"));
     wxRegEx b64Validate( wxT("^[A-Za-z0-9+/]+={0,3}$"));
     wxRegEx portStringValidate( wxT("(tcp|udp)/+[0-9]"));
 
-    if (this->NICK_NAME.CmpNoCase(wxEmptyString) == 0 ) { // this breaks editing.
+    if (this->NICK_NAME.CmpNoCase(wxEmptyString) == 0 ) {
         return wxT("You must choose a Nickname.");
-    } else if (ipValidate->Hostname(this->SERVER_IP) == false) { //check for valid ip or hostname
+    } else if (this->SERVER_IP.Find(_(".")) == wxNOT_FOUND) { //check for valid ip or hostname -- Relex this check greatly and throw the error when trying to send.
         return wxT("You must supply a valid server address.");
     } else if (wxAtoi(this->SERVER_PORT) < 1 || wxAtoi(this->SERVER_PORT) > 65535) {
         return wxT("Invalid Server Port"); //check server port is valid port or random
     } else if (this->LEGACY == true && this->HMAC.CmpNoCase(wxEmptyString) != 0) {//check no hmac with legacy
         return wxT("You cannot use an HMAC in legacy mode.");
-    } else if (this->KEY_BASE64 && wxStrlen(this->KEY) % 4 != 0) { //check // base64 must have a multiple of 4 length
+    } else if (this->KEY_BASE64 && wxStrlen(this->KEY) % 4 != 0) { //check base64 must have a multiple of 4 length
         return wxT("Invalid Base64 Key Length.");
     } else if (this->KEY_BASE64 && !b64Validate.Matches(this->KEY)) { // looks for disallowed b64 characters
         return wxT("Invalid Base64 Key.");
-    } else if (this->HMAC_BASE64 && wxStrlen(this->HMAC) % 4 != 0) { //check // base64 must have a multiple of 4 length
+    } else if (this->HMAC_BASE64 && wxStrlen(this->HMAC) % 4 != 0) { //check base64 must have a multiple of 4 length
         return wxT("Invalid Base64 HMAC Length.");
     } else if (this->HMAC_BASE64 && !b64Validate.Matches(this->HMAC)) { // looks for disallowed b64 characters
         return wxT("Invalid Base64 HMAC.");
-    } else if (!(this->MESS_TYPE.CmpNoCase(wxT("Server Command")) == 0 || portStringValidate.Matches(this->PORTS))) {
+    } else if (!(this->MESS_TYPE.CmpNoCase(wxT("Server Command")) == 0 || portStringValidate.Matches(this->PORTS))) { //If not a server command, make sure the port string is valid
         return wxT("Invalid Port string. Must look like tcp/22.");
-    } else if (!(this->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) ||  this->ACCESS_IP.CmpNoCase(wxT("Source IP")) || ipValidate->Hostname(this->ACCESS_IP) )) {
+    } else if (!(this->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) ||  this->ACCESS_IP.CmpNoCase(wxT("Source IP")) || findIP.Matches(this->ACCESS_IP) )) { //if specifying ip, make sure is valid
         return wxT("Invalid IP to allow."); // Have to have a valid ip to allow, if using allow ip
+    } else if (this->MESS_TYPE.CmpNoCase(wxT("Nat Access")) == 0 && !(findIP.Matches(this->NAT_IP) && 0 < wxAtoi(NAT_PORT) < 65536)) { //NAT_IP must be a valid ip, and NAT_PORT must be a valid port
+        return wxT("Invalid NAT ip/port.");
     } else {
         return wxT("valid");
     }
@@ -119,5 +123,151 @@ void Config::defaultConfig()
     this->NAT_IP = wxEmptyString;
     this->NAT_PORT = wxEmptyString;
     this->SERVER_CMD = wxEmptyString;
+}
 
+wxString Config::gen_SPA()
+{
+    CURL *curl;
+    CURLcode curl_Res;
+    fko_ctx_t ctx;
+    fwknop_options_t opts;
+    int key_len;
+    int hmac_str_len = 0;
+    short message_type = FKO_CLIENT_TIMEOUT_NAT_ACCESS_MSG;
+    char key_str[129] = {0}, hmac_str[129] = {0};
+    char spa_msg[256] = {0};
+    char nat_access_str[25] = {0};
+
+    memset(&opts, 0, sizeof(fwknop_options_t));
+
+    if (this->KEY.IsEmpty())
+        return _("Key cannot be blank!");
+    if (this->SERVER_PORT.CmpNoCase(wxT("random")) == 0)
+    {
+        srand((int)wxGetLocalTime());
+        this->SERVER_PORT.Empty();
+        this->SERVER_PORT << (rand()%55535 + 10000); // do this better, this isn't a horribly good random function
+    }
+    if (this->ACCESS_IP.CmpNoCase(wxT("Source IP")) == 0)
+        this->ACCESS_IP = wxT("0.0.0.0");
+    else if (this->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) == 0)
+    {
+        std::ostringstream oss;
+        curl_Res = curl_read("https://api.ipify.org", oss); //Eventually make this a user definable service.
+        if (curl_Res == CURLE_OK)
+        {
+            wxString result_tmp = wxString::FromUTF8(oss.str().c_str());
+            wxRegEx findIP( wxT("^(([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])$"));
+            if (!findIP.Matches(result_tmp))
+                return _("Unable to resolve our IP!");
+
+            this->ACCESS_IP =findIP.GetMatch(result_tmp);
+        } else
+            return _("Libcurl returned the error: ") + wxString::FromUTF8(curl_easy_strerror(curl_Res));
+
+    } //end resolve ip
+
+    if (this->KEY_BASE64)
+    {
+        key_len = fko_base64_decode(this->KEY.mb_str(), (unsigned char *)key_str);
+    } else {
+        strncpy(key_str, (const char*)this->KEY.mb_str(wxConvUTF8), 128);
+        key_len = (int)strlen(key_str);
+    }
+
+    if (this->HMAC_BASE64)
+    {
+        hmac_str_len = fko_base64_decode(this->HMAC.mb_str(), (unsigned char *)hmac_str);
+    } else {
+        strncpy(hmac_str, (const char*)this->HMAC.mb_str(wxConvUTF8), 128);
+        hmac_str_len = (int)strlen(hmac_str);
+    }
+
+    if (fko_new(&ctx) != FKO_SUCCESS)
+        return _("Could not get new FKO context");
+
+    if (!this->SERVER_CMD.IsEmpty())
+    {
+        message_type = FKO_COMMAND_MSG;
+        if (fko_set_spa_message_type(ctx, message_type) != FKO_SUCCESS)
+            return _("Chould not set message type");
+
+        if (fko_set_spa_message(ctx, this->SERVER_CMD.mb_str()) != FKO_SUCCESS)
+            return _("Could not set server command");
+
+    } else {
+        if (fko_set_spa_client_timeout(ctx, wxAtoi(this->SERVER_TIMEOUT)) != FKO_SUCCESS)
+            return _("Could not set SPA timeout");
+
+        snprintf(spa_msg, 256, "%s,%s", (const char*)this->ACCESS_IP.mb_str(wxConvUTF8), (const char*)this->PORTS.mb_str(wxConvUTF8));
+        if (fko_set_spa_message(ctx, spa_msg) != FKO_SUCCESS)
+            return _("Could not set SPA Message");
+
+    }
+    if (this->LEGACY) { // technically should trim hmac keys
+        if (fko_set_spa_encryption_mode(ctx, FKO_ENC_MODE_CBC_LEGACY_IV) != FKO_SUCCESS)
+            return _("Could not set Legacy mode.");
+
+    }
+    if (!this->HMAC.IsEmpty()){
+        if (fko_set_spa_hmac_type(ctx, FKO_DEFAULT_HMAC_MODE) != FKO_SUCCESS)
+            return _("Could not set HMAC type.");
+
+    }
+    if (!this->NAT_IP.IsEmpty())
+    {
+        sprintf(nat_access_str, "%s,%s", (const char*)this->NAT_IP.mb_str(wxConvUTF8), (const char*)this->NAT_PORT.mb_str(wxConvUTF8));
+        if (fko_set_spa_nat_access(ctx, nat_access_str) != FKO_SUCCESS)
+            return _("Could not set nat access string.");
+
+    }
+    if (fko_spa_data_final(ctx, key_str, key_len, hmac_str, hmac_str_len) != FKO_SUCCESS)
+        return _("Could not generate SPA data.");
+
+    if (fko_get_spa_data(ctx, &opts.spa_data) != FKO_SUCCESS)
+        return _("Could not retrieve SPA data.");
+
+    this->SPA_STRING = wxString::FromUTF8(opts.spa_data);
+    return _("Success");
+}
+
+static size_t data_write(void* buf, size_t size, size_t nmemb, void* userp)
+{
+	if(userp)
+	{
+		std::ostream& os = *static_cast<std::ostream*>(userp);
+		std::streamsize len = size * nmemb;
+		if(os.write(static_cast<char*>(buf), len))
+			return len;
+	}
+
+	return 0;
+}
+
+/**
+ * timeout is in seconds
+ **/
+CURLcode curl_read(const std::string& url, std::ostream& os, long timeout)
+{
+	CURLcode code(CURLE_FAILED_INIT);
+	CURL* curl = curl_easy_init();
+
+	if(curl)
+	{
+		if(CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_WRITEFUNCTION, &data_write))
+		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_NOPROGRESS, 1L))
+		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_FOLLOWLOCATION, 1L))
+		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_FILE, &os))
+		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_TIMEOUT, timeout))
+		#ifdef __WIN32__
+		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_CAINFO, "./ca-bundle.crt"))
+		#endif
+		&& CURLE_OK == (code = curl_easy_setopt(curl, CURLOPT_URL, url.c_str())))
+
+		{
+			code = curl_easy_perform(curl);
+		}
+		curl_easy_cleanup(curl);
+	}
+	return code;
 }

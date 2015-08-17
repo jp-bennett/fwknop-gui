@@ -55,19 +55,7 @@ class fwknop_guiFrame: public wxFrame
         wxCommandEvent *initMessTypeEvent;
         wxCommandEvent *initAllowIPEvent;
 
-        typedef struct fwknop_options
-        {
-            char           *spa_server_str;
-            unsigned int    spa_dst_port;
-            char           *spa_data;
 
-            //nat access options // am I using these?
-            char nat_access_str[1024];
-            int  nat_local;
-            int  nat_port;
-            int  nat_rand_port;
-            char server_command[1024];
-        } fwknop_options_t;
 
 
         enum

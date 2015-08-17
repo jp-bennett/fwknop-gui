@@ -4,6 +4,11 @@
 #include <wx/fileconf.h>
 #include <wx/socket.h>
 #include <wx/regex.h>
+#include <wx/time.h>
+#include <curl/curl.h>
+#include <curl/easy.h>
+#include <sstream>
+#include <fko.h>
 
 class Config
 {
@@ -31,4 +36,20 @@ class Config
         void saveConfig(wxFileConfig *configFile);
         void loadConfig(wxString Nick, wxFileConfig *configFile);
         void defaultConfig();
+        wxString gen_SPA(); // returns status.
+
+    private:
+        typedef struct fwknop_options
+        {
+            char           *spa_server_str;
+            unsigned int    spa_dst_port;
+            char           *spa_data;
+
+            //nat access options // am I using these?
+            char nat_access_str[1024];
+            int  nat_local;
+            int  nat_port;
+            int  nat_rand_port;
+            char server_command[1024];
+        } fwknop_options_t;
 };

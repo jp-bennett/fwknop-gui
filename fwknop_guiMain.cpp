@@ -404,143 +404,78 @@ void fwknop_guiFrame::OnLoad(wxCommandEvent &event)
 
 void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 {
-    if (listbox->GetSelection() == wxNOT_FOUND)
+    if (listbox->GetSelection() == wxNOT_FOUND) // want to return before even using the memory if nothing is selected
     {
-    wxMessageBox(_("No config selected!"));
+        wxMessageBox(_("No config selected!"));
+        return;
+    }
+
+//    CURL *curl;
+//    CURLcode curl_Res; //Use these when we switch to curl for sending http knocks
+    wxString SPA_Result;
+
+    ourConfig->loadConfig(listbox->GetString(listbox->GetSelection()), configFile);
+    if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
+        ourConfig->KEY = wxGetTextFromUser(_("Please enter your Rijndael key"));
+
+    SPA_Result = ourConfig->gen_SPA();
+    if (SPA_Result.Cmp(wxT("Success")) != 0 ) {
+    wxMessageBox(SPA_Result);
     return;
     }
-    CURL *curl;
-    CURLcode curl_Res;
-    fko_ctx_t ctx;
-    fwknop_options_t opts;
-    int key_len;
-    int res, hmac_str_len = 0;
-    ourConfig->loadConfig(listbox->GetString(listbox->GetSelection()), configFile);
-    short message_type = FKO_CLIENT_TIMEOUT_NAT_ACCESS_MSG;
-    char key_str[129] = {0}, hmac_str[129] = {0};
-    char spa_msg[256] = {0};
-    char nat_access_str[25] = {0};
 
-    memset(&opts, 0, sizeof(fwknop_options_t));
-
-    if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
-    ourConfig->KEY = wxGetTextFromUser(_("Please enter your Rijndael key"));
-
-    if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
-        return;
-    if (ourConfig->SERVER_PORT.CmpNoCase(wxT("random")) == 0)
-    {
-        srand((int)wxGetLocalTime());
-        ourConfig->SERVER_PORT = wxEmptyString;
-        ourConfig->SERVER_PORT << (rand()%55535 + 10000); // do this better
-    }
-    if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Source IP")) == 0)
-        ourConfig->ACCESS_IP = wxT("0.0.0.0");
-    else if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) == 0) // use wxExecute nslookup myip.opendns.com 208.67.222.222
-    {								//possibly use regex to search for ip in http
-
-        std::ostringstream oss;
-        curl_Res = curl_read("https://api.ipify.org", oss);
-	if (curl_Res == CURLE_OK)
-	{
-		// Web page successfully written to string
-		wxString result_tmp = wxString::FromUTF8(oss.str().c_str());
-		wxRegEx findIP( wxT("^(([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])$"));
-		if (!findIP.Matches(result_tmp))
-		{
-            wxMessageBox(_("Unable to resolve our IP!"));
-
-            return;
-		}
-		ourConfig->ACCESS_IP =findIP.GetMatch(result_tmp);
-		//wxMessageBox(ourConfig->ACCESS_IP);
-	} else {
-        wxMessageBox(_("Libcurl returned the error: ") + wxString::FromUTF8(curl_easy_strerror(curl_Res)));
-
-        return;
-            }
-        }
-
-    if (ourConfig->KEY_BASE64)
-    {
-        key_len = fko_base64_decode(ourConfig->KEY.mb_str(), (unsigned char *)key_str);
-    } else {
-        strncpy(key_str, (const char*)ourConfig->KEY.mb_str(wxConvUTF8), 128);
-        key_len = (int)strlen(key_str);
-    }
-
-    if (ourConfig->HMAC_BASE64)
-    {
-        hmac_str_len = fko_base64_decode(ourConfig->HMAC.mb_str(), (unsigned char *)hmac_str);
-    } else {
-        strncpy(hmac_str, (const char*)ourConfig->HMAC.mb_str(wxConvUTF8), 128);
-        hmac_str_len = (int)strlen(hmac_str);
-    }
-
-    res = fko_new(&ctx);
-
-    if (ourConfig->SERVER_CMD.CmpNoCase(wxEmptyString) != 0)
-    {
-    message_type = FKO_COMMAND_MSG;
-    fko_set_spa_message_type(ctx, message_type);
-    res = fko_set_spa_message(ctx, ourConfig->SERVER_CMD.mb_str());
-
-    } else {
-
-
-    res = fko_set_spa_client_timeout(ctx, wxAtoi(ourConfig->SERVER_TIMEOUT));
-
-    snprintf(spa_msg, 256, "%s,%s", (const char*)ourConfig->ACCESS_IP.mb_str(wxConvUTF8), (const char*)ourConfig->PORTS.mb_str(wxConvUTF8));
-    res = fko_set_spa_message(ctx, spa_msg);
-
-    }
-
-    //Todo: Nat Access and Server Cmd
-    if (ourConfig->LEGACY)
-        fko_set_spa_encryption_mode(ctx, FKO_ENC_MODE_CBC_LEGACY_IV);
-
-    if (ourConfig->HMAC.CmpNoCase(wxEmptyString) != 0)
-        fko_set_spa_hmac_type(ctx, FKO_DEFAULT_HMAC_MODE);
-
-    if (ourConfig->NAT_IP.CmpNoCase(wxEmptyString) != 0)
-    {
-        sprintf(nat_access_str, "%s,%s", (const char*)ourConfig->NAT_IP.mb_str(wxConvUTF8), (const char*)ourConfig->NAT_PORT.mb_str(wxConvUTF8));
-        res = fko_set_spa_nat_access(ctx, nat_access_str);
-
-    }
-
-    fko_spa_data_final(ctx, key_str, key_len, hmac_str, hmac_str_len);
-     res = fko_get_spa_data(ctx, &opts.spa_data);
-     ourConfig->SPA_STRING = wxString::FromUTF8(opts.spa_data);
-
-
-     //if udp, and then implement tcp and http
     if (ourConfig->PROTOCOL.CmpNoCase(wxT("UDP")) == 0) {
         wxIPV4address serverAddr;
         wxIPV4address ourAddr;
         ourAddr.AnyAddress();
         ourAddr.Service(0);
-        serverAddr.Hostname(ourConfig->SERVER_IP);
-        serverAddr.Service(ourConfig->SERVER_PORT);
-        wxDatagramSocket *m_socket;
-        m_socket = new wxDatagramSocket(ourAddr, wxSOCKET_NOWAIT);
-        m_socket->SendTo(serverAddr, ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
-        m_socket->WaitForWrite();
-        m_socket->Destroy();
+        if (serverAddr.Hostname(ourConfig->SERVER_IP))
+        {
+            if (serverAddr.Service(ourConfig->SERVER_PORT))
+            {
+                wxDatagramSocket *m_socket;
+                m_socket = new wxDatagramSocket(ourAddr, wxSOCKET_NOWAIT);
+                m_socket->SendTo(serverAddr, ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
+                m_socket->WaitForWrite();
+                if (m_socket->Error()) {
+                    wxMessageBox(_("Could not send knock: Error sending."));
+                } else {
+                    wxMessageBox(_("Knock sent successfully."));
+                }
+                m_socket->Destroy();
+
+            } else
+                wxMessageBox(_("Could not send knock: could not set server port."));
+
+        } else
+            wxMessageBox(_("Could not send knock: could not set server address."));
+
     } else if (ourConfig->PROTOCOL.CmpNoCase(wxT("TCP")) == 0) {
         wxIPV4address tcp_serverAddr;
         wxIPV4address ourAddr;
         ourAddr.AnyAddress();
         ourAddr.Service(0);
-        tcp_serverAddr.Hostname(ourConfig->SERVER_IP);
-        tcp_serverAddr.Service(ourConfig->SERVER_PORT);
-        wxSocketClient *tcp_socket = new wxSocketClient;
-        tcp_socket->Connect(tcp_serverAddr);
-        tcp_socket->WaitForWrite();
-        tcp_socket->Write(ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
-        tcp_socket->WaitForWrite();
-        tcp_socket->Destroy();
+        if (tcp_serverAddr.Hostname(ourConfig->SERVER_IP))
+        {
+            if (tcp_serverAddr.Service(ourConfig->SERVER_PORT))
+            {
+                wxSocketClient *tcp_socket = new wxSocketClient;
+                tcp_socket->Connect(tcp_serverAddr);
+                tcp_socket->WaitForWrite();
+                tcp_socket->Write(ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
+                tcp_socket->WaitForWrite();
+                if (tcp_socket->Error()) {
+                    wxMessageBox(_("Could not send knock: Error sending."));
+                } else {
+                    wxMessageBox(_("Knock sent successfully."));
+                }
+                tcp_socket->Destroy();
 
+            } else
+            wxMessageBox(_("Could not send knock: could not set server address."));
+
+        } else
+            wxMessageBox(_("Could not send knock: could not set server address."));
 
     } else if (ourConfig->PROTOCOL.CmpNoCase(wxT("HTTP")) == 0) {
         wxHTTP *http_serv = new wxHTTP;
@@ -671,7 +606,7 @@ static size_t data_write(void* buf, size_t size, size_t nmemb, void* userp)
 
 /**
  * timeout is in seconds
- **/
+ **
 CURLcode curl_read(const std::string& url, std::ostream& os, long timeout)
 {
 	CURLcode code(CURLE_FAILED_INIT);
@@ -696,3 +631,4 @@ CURLcode curl_read(const std::string& url, std::ostream& os, long timeout)
 	}
 	return code;
 }
+*/
