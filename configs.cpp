@@ -140,6 +140,8 @@ wxString Config::gen_SPA()
 
     if (this->KEY.IsEmpty())
         return _("Key cannot be blank!");
+
+    wxBusyInfo wait("Please wait, working...");
     if (this->SERVER_PORT.CmpNoCase(wxT("random")) == 0)
     {
         srand((int)wxGetLocalTime());

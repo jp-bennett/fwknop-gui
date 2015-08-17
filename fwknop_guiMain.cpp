@@ -273,8 +273,6 @@ vListBox->Add(ok);
 
 hbox->Add(vListBox, 0, wxEXPAND);
 
-
-
 vConfigBox->Add(hNickBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hServAddrBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hLegacyBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
@@ -298,16 +296,8 @@ vConfigBox->Add(save,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 OnChoice(*initMessTypeEvent);
 OnChoice(*initAllowIPEvent);
 
-
 hbox->Add(vConfigBox, 1, wxALIGN_CENTER_HORIZONTAL | wxTOP, 5);
 configPanel->SetSizer(hbox);
-//configPanel->Add(hbox, wxEXPAND);
-//configPanel->Refresh();
-//configPanel->Update();
-
-//this->Centre();
-
-
 
 }
 
@@ -557,8 +547,15 @@ curl_global_cleanup();
 
 void fwknop_guiFrame::OnAbout(wxCommandEvent &event)
 {
-    wxString msg = wxbuildinfo(long_f);
-    wxMessageBox(msg, _("Welcome to..."));
+    //wxString msg = _("Fwknop-gui was created by Jonathan Bennett \nBased on fwknop and libfko written by Michael Rash");
+    //wxMessageBox(msg, _("Fwknop-gui"));
+    wxAboutDialogInfo aboutInfo;
+    aboutInfo.SetName("Fwknop-gui");
+    aboutInfo.SetVersion(".1");
+    aboutInfo.SetDescription(_("Fwknop-gui is a cross platform graphical fwknop client."));
+    aboutInfo.SetWebSite("https://github.com/oneru/fwknop-gui");
+    aboutInfo.AddDeveloper("Jonathan Bennett");
+    wxAboutBox(aboutInfo);
 }
 
 

@@ -17,6 +17,7 @@
 #include <wx/event.h>
 #include <wx/fileconf.h>
 #include <wx/arrstr.h>
+#include <wx/aboutdlg.h>
 #include <fko.h>
 #include "configs.h"
 #include <wx/sstream.h>
