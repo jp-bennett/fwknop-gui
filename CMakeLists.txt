@@ -37,9 +37,6 @@ add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
   ${CODE_FILES}
   )
 
-# This assumes libfko is installed and devel packages in the standard location.
-# That really should have a proper library check.
-
 target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} fko curl)
 if(IS_WIN32)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -static")
