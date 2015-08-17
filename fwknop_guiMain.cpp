@@ -550,11 +550,11 @@ void fwknop_guiFrame::OnAbout(wxCommandEvent &event)
     //wxString msg = _("Fwknop-gui was created by Jonathan Bennett \nBased on fwknop and libfko written by Michael Rash");
     //wxMessageBox(msg, _("Fwknop-gui"));
     wxAboutDialogInfo aboutInfo;
-    aboutInfo.SetName("Fwknop-gui");
-    aboutInfo.SetVersion(".1");
+    aboutInfo.SetName(_("Fwknop-gui"));
+    aboutInfo.SetVersion(_(".1"));
     aboutInfo.SetDescription(_("Fwknop-gui is a cross platform graphical fwknop client."));
-    aboutInfo.SetWebSite("https://github.com/oneru/fwknop-gui");
-    aboutInfo.AddDeveloper("Jonathan Bennett");
+    aboutInfo.SetWebSite(_("https://github.com/oneru/fwknop-gui"));
+    aboutInfo.AddDeveloper(_("Jonathan Bennett"));
     wxAboutBox(aboutInfo);
 }
 
