@@ -26,7 +26,6 @@ configs->Sort();
 
 wxString Config::validateConfig()
 {
-    wxIPV4address *ipValidate = new wxIPV4address;
     wxRegEx findIP( wxT("^(([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])$"));
     wxRegEx b64Validate( wxT("^[A-Za-z0-9+/]+={0,3}$"));
     wxRegEx portStringValidate( wxT("(tcp|udp)/+[0-9]"));
@@ -51,7 +50,7 @@ wxString Config::validateConfig()
         return wxT("Invalid Port string. Must look like tcp/22.");
     } else if (!(this->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) ||  this->ACCESS_IP.CmpNoCase(wxT("Source IP")) || findIP.Matches(this->ACCESS_IP) )) { //if specifying ip, make sure is valid
         return wxT("Invalid IP to allow."); // Have to have a valid ip to allow, if using allow ip
-    } else if (this->MESS_TYPE.CmpNoCase(wxT("Nat Access")) == 0 && !(findIP.Matches(this->NAT_IP) && 0 < wxAtoi(NAT_PORT) < 65536)) { //NAT_IP must be a valid ip, and NAT_PORT must be a valid port
+    } else if (this->MESS_TYPE.CmpNoCase(wxT("Nat Access")) == 0 && !(findIP.Matches(this->NAT_IP) && (0 < wxAtoi(NAT_PORT) && wxAtoi(NAT_PORT) < 65536))) { //NAT_IP must be a valid ip, and NAT_PORT must be a valid port
         return wxT("Invalid NAT ip/port.");
     } else {
         return wxT("valid");
@@ -127,7 +126,6 @@ void Config::defaultConfig()
 
 wxString Config::gen_SPA()
 {
-    CURL *curl;
     CURLcode curl_Res;
     fko_ctx_t ctx;
     fwknop_options_t opts;

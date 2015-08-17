@@ -4,7 +4,7 @@
 #include <wx/fileconf.h>
 #include <wx/socket.h>
 #include <wx/regex.h>
-#include <wx/time.h>
+#include <wx/timer.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <sstream>
