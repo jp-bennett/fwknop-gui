@@ -52,6 +52,7 @@ BEGIN_EVENT_TABLE(fwknop_guiFrame, wxFrame)
     EVT_MENU(idMenuNew, fwknop_guiFrame::OnNew)
     EVT_MENU(idMenuDelete, fwknop_guiFrame::OnDelete)
     EVT_MENU(idMenuAbout, fwknop_guiFrame::OnAbout)
+    EVT_CHECKBOX(ID_Random, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_AllowIP, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_MessType, fwknop_guiFrame::OnChoice)
     EVT_BUTTON(ID_SaveButton, fwknop_guiFrame::OnSave)
@@ -95,7 +96,8 @@ vConfigBox = new wxBoxSizer(wxVERTICAL);
 wxBoxSizer *hNickBox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *hServAddrBox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *hLegacyBox = new wxBoxSizer(wxHORIZONTAL);
-wxBoxSizer *hServPortBox = new wxBoxSizer(wxHORIZONTAL);
+wxBoxSizer *hRandomBox = new wxBoxSizer(wxHORIZONTAL);
+hServPortBox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *hProtoBox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *hKeyBox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *hKeyB64Box = new wxBoxSizer(wxHORIZONTAL);
@@ -111,6 +113,7 @@ hInternalPortBox = new wxBoxSizer(wxHORIZONTAL);
 hServCmdBox = new wxBoxSizer(wxHORIZONTAL);
 initMessTypeEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_MessType);
 initAllowIPEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_AllowIP);
+initCheckboxEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_Random);
 configFile = new wxFileConfig (wxT("fwknop-gui"));
 ourConfigList = new wxArrayString;
 ourConfig = new Config;
@@ -134,9 +137,10 @@ hServAddrBox->Add(ServAddrTxt,1, wxEXPAND);
 
 
 LegacyChk = new wxCheckBox(this, wxID_ANY,wxT("Use Legacy Mode"));
-
 hLegacyBox->Add(LegacyChk);
 
+RandomChk = new wxCheckBox(this, ID_Random,wxT("Use Random Port"));
+hRandomBox->Add(RandomChk);
 
 wxStaticText *ServPortLbl = new wxStaticText(this,wxID_ANY, wxT("Server Port: "));
 ServPortTxt = new wxTextCtrl(this, wxID_ANY,wxT("62201"));
@@ -255,11 +259,6 @@ hServCmdBox->Add(ServCmdLbl,0,wxALIGN_BOTTOM);
 hServCmdBox->Add(ServCmdTxt,1, wxEXPAND);
 
 
-
-
-
-
-
 listbox = new wxListBox(this, ID_List, wxPoint(-1, -1), wxSize(200, -1));
 ourConfig->getAllConfigs(ourConfigList, configFile);
 listbox->InsertItems(*ourConfigList,0);
@@ -277,6 +276,7 @@ hbox->Add(vListBox, 0, wxEXPAND);
 vConfigBox->Add(hNickBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hServAddrBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hLegacyBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
+vConfigBox->Add(hRandomBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hServPortBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hProtoBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hKeyBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
@@ -317,7 +317,11 @@ void fwknop_guiFrame::OnSave(wxCommandEvent &event)
     ourConfig->NICK_NAME = NickTxt->GetLineText(0);
     ourConfig->SERVER_IP = ServAddrTxt->GetLineText(0);
     ourConfig->LEGACY = LegacyChk->GetValue();
-    ourConfig->SERVER_PORT = ServPortTxt->GetLineText(0);
+    if (RandomChk->GetValue()) {
+        ourConfig->SERVER_PORT = wxT("random");
+    } else {
+        ourConfig->SERVER_PORT = ServPortTxt->GetLineText(0);
+    }
     ourConfig->PROTOCOL = ProtoChoice->GetString(ProtoChoice->GetSelection());   //Change this for i18n
     ourConfig->KEY = KeyTxt->GetLineText(0);
     ourConfig->KEY_BASE64 = KeyB64Chk->GetValue();
@@ -356,6 +360,15 @@ void fwknop_guiFrame::OnChoice(wxCommandEvent &event)
 {
     switch (event.GetId())
     {
+    case ID_Random:
+        if (RandomChk->GetValue()) {
+            vConfigBox->Hide(hServPortBox);
+        } else {
+            vConfigBox->Show(hServPortBox);
+        }
+
+    break;
+
     case ID_AllowIP:
         if (AllowIPChoice->GetSelection() == 2)
         {
@@ -551,7 +564,12 @@ void fwknop_guiFrame::populate()
     NickTxt->ChangeValue(ourConfig->NICK_NAME);
     ServAddrTxt->ChangeValue(ourConfig->SERVER_IP);
     LegacyChk->SetValue(ourConfig->LEGACY);
-    ServPortTxt->SetValue(ourConfig->SERVER_PORT);
+    if (ourConfig->SERVER_PORT.CmpNoCase(wxT("Random")) == 0) {
+    RandomChk->SetValue(true);
+    } else {
+        RandomChk->SetValue(false);
+        ServPortTxt->SetValue(ourConfig->SERVER_PORT);
+    }
     if (ourConfig->PROTOCOL.CmpNoCase(wxT("UDP")) == 0)
         ProtoChoice->SetSelection(0);
     else if (ourConfig->PROTOCOL.CmpNoCase(wxT("TCP")) == 0)
@@ -587,6 +605,7 @@ void fwknop_guiFrame::populate()
     ServCmdTxt->SetValue(ourConfig->SERVER_CMD);
     OnChoice(*initMessTypeEvent);
     OnChoice(*initAllowIPEvent);
+    OnChoice(*initCheckboxEvent);
 
 }
 

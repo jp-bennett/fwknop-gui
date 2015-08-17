@@ -34,7 +34,7 @@ wxString Config::validateConfig()
         return wxT("You must choose a Nickname.");
     } else if (this->SERVER_IP.Find(_(".")) == wxNOT_FOUND) { //check for valid ip or hostname -- Relex this check greatly and throw the error when trying to send.
         return wxT("You must supply a valid server address.");
-    } else if (wxAtoi(this->SERVER_PORT) < 1 || wxAtoi(this->SERVER_PORT) > 65535) {
+    } else if((wxAtoi(this->SERVER_PORT) < 1 || wxAtoi(this->SERVER_PORT) > 65535) && this->SERVER_PORT.CmpNoCase(wxT("Random")) != 0){
         return wxT("Invalid Server Port"); //check server port is valid port or random
     } else if (this->LEGACY == true && this->HMAC.CmpNoCase(wxEmptyString) != 0) {//check no hmac with legacy
         return wxT("You cannot use an HMAC in legacy mode.");

@@ -26,6 +26,7 @@ class fwknop_guiFrame: public wxFrame
         wxBoxSizer *hbox;
         wxBoxSizer *vConfigBox;
         wxBoxSizer *hIPToAllowBox;
+        wxBoxSizer *hServPortBox;
         wxChoice *AllowIPChoice;
         wxChoice *MessTypeChoice;
         wxBoxSizer *hAccessPortsBox;
@@ -40,6 +41,7 @@ class fwknop_guiFrame: public wxFrame
         wxListBox *listbox;
         wxTextCtrl *ServAddrTxt;
         wxCheckBox *LegacyChk;
+        wxCheckBox *RandomChk;
         wxTextCtrl *ServPortTxt;
         wxTextCtrl *KeyTxt;
         wxCheckBox *KeyB64Chk;
@@ -54,6 +56,7 @@ class fwknop_guiFrame: public wxFrame
         wxTextCtrl *ServCmdTxt;
         wxCommandEvent *initMessTypeEvent;
         wxCommandEvent *initAllowIPEvent;
+        wxCommandEvent *initCheckboxEvent;
 
 
 
@@ -68,7 +71,8 @@ class fwknop_guiFrame: public wxFrame
             ID_MessType,
             ID_SaveButton,
             ID_List,
-            ID_KnockButton
+            ID_KnockButton,
+            ID_Random
         };
         void populate();
         void OnClose(wxCloseEvent& event);
