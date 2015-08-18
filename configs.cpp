@@ -124,7 +124,7 @@ void Config::defaultConfig()
     this->SERVER_CMD = wxEmptyString;
 }
 
-wxString Config::gen_SPA()
+wxString Config::gen_SPA(wxString ip_resolver_url)
 {
     CURLcode curl_Res;
     fko_ctx_t ctx;
@@ -153,7 +153,7 @@ wxString Config::gen_SPA()
     else if (this->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) == 0)
     {
         std::ostringstream oss;
-        curl_Res = curl_read("https://api.ipify.org", oss); //Eventually make this a user definable service.
+        curl_Res = curl_read(std::string(ip_resolver_url.mb_str()), oss); //Eventually make this a user definable service.
         if (curl_Res == CURLE_OK)
         {
             wxString result_tmp = wxString::FromUTF8(oss.str().c_str());

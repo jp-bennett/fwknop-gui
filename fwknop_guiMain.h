@@ -65,6 +65,7 @@ class fwknop_guiFrame: public wxFrame
         {
             idMenuQuit = 1000,
             idMenuAbout,
+            idMenuSettings,
             idMenuNew,
             idMenuDelete,
             ID_AllowIP,
@@ -80,6 +81,7 @@ class fwknop_guiFrame: public wxFrame
         void OnNew(wxCommandEvent& event);
         void OnDelete(wxCommandEvent& event);
         void OnAbout(wxCommandEvent& event);
+        void OnSettings(wxCommandEvent& event);
         void OnChoice(wxCommandEvent& event);
         void OnSave(wxCommandEvent& event);
         void OnLoad(wxCommandEvent& event);

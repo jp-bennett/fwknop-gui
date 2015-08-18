@@ -37,7 +37,7 @@ class Config
         void saveConfig(wxFileConfig *configFile);
         void loadConfig(wxString Nick, wxFileConfig *configFile);
         void defaultConfig();
-        wxString gen_SPA(); // returns status.
+        wxString gen_SPA(wxString ip_resolver_url); // returns status.
 
     private:
         typedef struct fwknop_options

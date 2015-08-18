@@ -52,6 +52,7 @@ BEGIN_EVENT_TABLE(fwknop_guiFrame, wxFrame)
     EVT_MENU(idMenuNew, fwknop_guiFrame::OnNew)
     EVT_MENU(idMenuDelete, fwknop_guiFrame::OnDelete)
     EVT_MENU(idMenuAbout, fwknop_guiFrame::OnAbout)
+    EVT_MENU(idMenuSettings, fwknop_guiFrame::OnSettings)
     EVT_CHECKBOX(ID_Random, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_AllowIP, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_MessType, fwknop_guiFrame::OnChoice)
@@ -67,9 +68,10 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
     // create a menu bar
     wxMenuBar* mbar = new wxMenuBar();
     wxMenu* fileMenu = new wxMenu(_T(""));
-    fileMenu->Append(idMenuQuit, _("&Quit\tAlt-F4"), _("Quit the application"));
+    fileMenu->Append(idMenuSettings, _("Settings"));
     fileMenu->Append(idMenuNew, _("&New Config"));
     fileMenu->Append(idMenuDelete, _("&Delete Config"));
+    fileMenu->Append(idMenuQuit, _("&Quit\tAlt-F4"), _("Quit the application"));
     mbar->Append(fileMenu, _("&File"));
 
     wxMenu* helpMenu = new wxMenu(_T(""));
@@ -426,7 +428,8 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
         ourConfig->KEY = wxGetTextFromUser(_("Please enter your Rijndael key"));
 
-    SPA_Result = ourConfig->gen_SPA();
+    configFile->SetPath(wxT("/"));
+    SPA_Result = ourConfig->gen_SPA(configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")));
     if (SPA_Result.Cmp(wxT("Success")) != 0 ) {
     wxMessageBox(SPA_Result);
     return;
@@ -510,6 +513,18 @@ listbox->SetSelection(wxNOT_FOUND);
 ourConfig->defaultConfig();
 this->populate();
 
+}
+
+void fwknop_guiFrame::OnSettings(wxCommandEvent &event)
+{
+    configFile->SetPath(wxT("/"));
+
+    wxString tmp_url = wxGetTextFromUser(_("Url to use to resolve IP. Leave blank to reset to default."), _("Resolve url"), configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")));
+    if (tmp_url.IsEmpty()) {
+        configFile->Write(wxT("ip_resolver_url"), wxT("https://api.ipify.org"));
+    } else {
+        configFile->Write(wxT("ip_resolver_url"),tmp_url);
+    }
 }
 
 void fwknop_guiFrame::OnDelete(wxCommandEvent &event)
@@ -612,7 +627,7 @@ void fwknop_guiFrame::populate()
 }
 
 
-static size_t data_write(void* buf, size_t size, size_t nmemb, void* userp)
+/*static size_t data_write(void* buf, size_t size, size_t nmemb, void* userp)
 {
 	if(userp)
 	{
@@ -623,11 +638,12 @@ static size_t data_write(void* buf, size_t size, size_t nmemb, void* userp)
 	}
 
 	return 0;
-}
+} */
 
 /**
  * timeout is in seconds
- **
+ **/
+ /*
 CURLcode curl_read(const std::string& url, std::ostream& os, long timeout)
 {
 	CURLcode code(CURLE_FAILED_INIT);
