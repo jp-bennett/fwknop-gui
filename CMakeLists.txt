@@ -38,6 +38,10 @@ add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
 
 
 target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES})
+if(IS_LINUX)
+install(FILES help.html DESTINATION share/fwknop-gui)
+install(TARGETS fwknop-gui DESTINATION bin)
+endif()
 if(IS_WIN32)
   set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -static")
 endif()

@@ -578,10 +578,23 @@ void fwknop_guiFrame::OnAbout(wxCommandEvent &event)
 
 void fwknop_guiFrame::OnHelpScreen(wxCommandEvent &event)
 {
+    #if wxMAJOR_VERSION < 3
+    wxStandardPaths ourPath;
+    #else
+    wxStandardPaths ourPath = wxStandardPaths::Get();
+    #endif // wxMAJOR_VERSION
     wxFrame *frame = new wxFrame(this, wxID_ANY, _("Fwknop-gui help"));
     wxHtmlWindow *html = new wxHtmlWindow(frame, ID_html);
-    html->LoadPage(_("help.html"));
-    frame->Show(true);
+    if (wxFileExists(_("help.html"))) {
+        html->LoadPage(_("help.html"));
+        frame->Show(true);
+    } else if(wxFileExists(ourPath.GetDataDir() + _("/help.html"))) {
+        html->LoadPage(ourPath.GetDataDir() + _("/help.html"));
+        frame->Show(true);
+    } else {
+        wxMessageBox(_("Could not open help file at: ") + ourPath.GetDataDir());
+    }
+
 
 }
 
