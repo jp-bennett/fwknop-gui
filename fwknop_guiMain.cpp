@@ -52,6 +52,7 @@ BEGIN_EVENT_TABLE(fwknop_guiFrame, wxFrame)
     EVT_MENU(idMenuNew, fwknop_guiFrame::OnNew)
     EVT_MENU(idMenuDelete, fwknop_guiFrame::OnDelete)
     EVT_MENU(idMenuAbout, fwknop_guiFrame::OnAbout)
+    EVT_MENU(idMenuHelpScreen, fwknop_guiFrame::OnHelpScreen)
     EVT_MENU(idMenuSettings, fwknop_guiFrame::OnSettings)
     EVT_CHECKBOX(ID_Random, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_AllowIP, fwknop_guiFrame::OnChoice)
@@ -59,6 +60,7 @@ BEGIN_EVENT_TABLE(fwknop_guiFrame, wxFrame)
     EVT_BUTTON(ID_SaveButton, fwknop_guiFrame::OnSave)
     EVT_BUTTON(ID_KnockButton, fwknop_guiFrame::OnKnock)
     EVT_LISTBOX(ID_List, fwknop_guiFrame::OnLoad)
+    EVT_HTML_LINK_CLICKED(ID_html, fwknop_guiFrame::OnLink)
 END_EVENT_TABLE()
 
 fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
@@ -76,6 +78,7 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
 
     wxMenu* helpMenu = new wxMenu(_T(""));
     helpMenu->Append(idMenuAbout, _("&About\tF1"), _("Show info about this application"));
+    helpMenu->Append(idMenuHelpScreen, _("&Help Screen"), _("Show help screen"));
     mbar->Append(helpMenu, _("&Help"));
 
     SetMenuBar(mbar);
@@ -566,14 +569,27 @@ void fwknop_guiFrame::OnAbout(wxCommandEvent &event)
     //wxMessageBox(msg, _("Fwknop-gui"));
     wxAboutDialogInfo aboutInfo;
     aboutInfo.SetName(_("Fwknop-gui"));
-    aboutInfo.SetVersion(_(".1"));
+    aboutInfo.SetVersion(_("Version .1"));
     aboutInfo.SetDescription(_("Fwknop-gui is a cross platform graphical fwknop client."));
     aboutInfo.SetWebSite(_("https://github.com/oneru/fwknop-gui"));
     aboutInfo.AddDeveloper(_("Jonathan Bennett"));
     wxAboutBox(aboutInfo);
 }
 
+void fwknop_guiFrame::OnHelpScreen(wxCommandEvent &event)
+{
+    wxFrame *frame = new wxFrame(this, wxID_ANY, _("Fwknop-gui help"));
+    wxHtmlWindow *html = new wxHtmlWindow(frame, ID_html);
+    html->LoadPage(_("help.html"));
+    frame->Show(true);
 
+}
+
+void fwknop_guiFrame::OnLink(wxHtmlLinkEvent &event)
+{
+    wxLaunchDefaultBrowser(event.GetLinkInfo().GetHref());
+
+}
 
 void fwknop_guiFrame::populate()
 {

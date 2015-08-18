@@ -65,6 +65,7 @@ class fwknop_guiFrame: public wxFrame
         {
             idMenuQuit = 1000,
             idMenuAbout,
+            idMenuHelpScreen,
             idMenuSettings,
             idMenuNew,
             idMenuDelete,
@@ -73,7 +74,8 @@ class fwknop_guiFrame: public wxFrame
             ID_SaveButton,
             ID_List,
             ID_KnockButton,
-            ID_Random
+            ID_Random,
+            ID_html
         };
         void populate();
         void OnClose(wxCloseEvent& event);
@@ -81,10 +83,12 @@ class fwknop_guiFrame: public wxFrame
         void OnNew(wxCommandEvent& event);
         void OnDelete(wxCommandEvent& event);
         void OnAbout(wxCommandEvent& event);
+        void OnHelpScreen(wxCommandEvent& event);
         void OnSettings(wxCommandEvent& event);
         void OnChoice(wxCommandEvent& event);
         void OnSave(wxCommandEvent& event);
         void OnLoad(wxCommandEvent& event);
+        void OnLink(wxHtmlLinkEvent& event);
         void OnKnock(wxCommandEvent& event);
         DECLARE_EVENT_TABLE()
 };
