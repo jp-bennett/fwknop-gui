@@ -569,7 +569,7 @@ void fwknop_guiFrame::OnAbout(wxCommandEvent &event)
     //wxMessageBox(msg, _("Fwknop-gui"));
     wxAboutDialogInfo aboutInfo;
     aboutInfo.SetName(_("Fwknop-gui"));
-    aboutInfo.SetVersion(_("Version .1"));
+    aboutInfo.SetVersion(_("Version 1.0"));
     aboutInfo.SetDescription(_("Fwknop-gui is a cross platform graphical fwknop client."));
     aboutInfo.SetWebSite(_("https://github.com/oneru/fwknop-gui"));
     aboutInfo.AddDeveloper(_("Jonathan Bennett"));
@@ -578,21 +578,16 @@ void fwknop_guiFrame::OnAbout(wxCommandEvent &event)
 
 void fwknop_guiFrame::OnHelpScreen(wxCommandEvent &event)
 {
-    #if wxMAJOR_VERSION < 3
-    wxStandardPaths ourPath;
-    #else
-    wxStandardPaths ourPath = wxStandardPaths::Get();
-    #endif // wxMAJOR_VERSION
     wxFrame *frame = new wxFrame(this, wxID_ANY, _("Fwknop-gui help"));
     wxHtmlWindow *html = new wxHtmlWindow(frame, ID_html);
     if (wxFileExists(_("help.html"))) {
         html->LoadPage(_("help.html"));
         frame->Show(true);
-    } else if(wxFileExists(ourPath.GetDataDir() + _("/help.html"))) {
-        html->LoadPage(ourPath.GetDataDir() + _("/help.html"));
+    } else if(wxFileExists(wxStandardPaths::Get().GetDataDir() + _("/help.html"))) {
+        html->LoadPage(wxStandardPaths::Get().GetDataDir() + _("/help.html"));
         frame->Show(true);
     } else {
-        wxMessageBox(_("Could not open help file at: ") + ourPath.GetDataDir());
+        wxMessageBox(_("Could not open help file at: ") + wxStandardPaths::Get().GetDataDir());
     }
 
 
