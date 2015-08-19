@@ -113,6 +113,9 @@ hFwTimeBox = new wxBoxSizer(wxHORIZONTAL);
 hInternalIPBox = new wxBoxSizer(wxHORIZONTAL);
 hInternalPortBox = new wxBoxSizer(wxHORIZONTAL);
 hServCmdBox = new wxBoxSizer(wxHORIZONTAL);
+wxBoxSizer *hDigestTypeBox = new wxBoxSizer(wxHORIZONTAL);
+wxBoxSizer *hHmacTypeBox = new wxBoxSizer(wxHORIZONTAL);
+
 initMessTypeEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_MessType);
 initAllowIPEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_AllowIP);
 initCheckboxEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_Random);
@@ -260,6 +263,33 @@ ServCmdTxt = new wxTextCtrl(configPanel, wxID_ANY);
 hServCmdBox->Add(ServCmdLbl,0,wxALIGN_BOTTOM);
 hServCmdBox->Add(ServCmdTxt,1, wxEXPAND);
 
+wxStaticText *DigestTypeLbl = new wxStaticText(configPanel,wxID_ANY, wxT("SPA Digest Type: "));
+wxArrayString DigestType;
+DigestType.Add(wxT("MD5"));
+DigestType.Add(wxT("SHA1"));
+DigestType.Add(wxT("SHA256"));
+DigestType.Add(wxT("SHA384"));
+DigestType.Add(wxT("SHA512"));
+DigestTypeChoice = new wxChoice(configPanel, ID_DigestType, wxDefaultPosition, wxDefaultSize,
+   DigestType);
+
+hDigestTypeBox->Add(DigestTypeLbl,0,wxALIGN_BOTTOM);
+hDigestTypeBox->Add(DigestTypeChoice);
+DigestTypeChoice->SetSelection(2);
+
+wxStaticText *HmacTypeLbl = new wxStaticText(configPanel,wxID_ANY, wxT("SPA HMAC Type: "));
+wxArrayString HmacType;
+HmacType.Add(wxT("MD5"));
+HmacType.Add(wxT("SHA1"));
+HmacType.Add(wxT("SHA256"));
+HmacType.Add(wxT("SHA384"));
+HmacType.Add(wxT("SHA512"));
+HmacTypeChoice = new wxChoice(configPanel, ID_HmacType, wxDefaultPosition, wxDefaultSize,
+   HmacType);
+
+hHmacTypeBox->Add(HmacTypeLbl,0,wxALIGN_BOTTOM);
+hHmacTypeBox->Add(HmacTypeChoice);
+HmacTypeChoice->SetSelection(2);
 
 listbox = new wxListBox(configPanel, ID_List, wxPoint(-1, -1), wxSize(200, -1));
 ourConfig->getAllConfigs(ourConfigList, configFile);
@@ -293,6 +323,8 @@ vConfigBox->Add(hFwTimeBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hInternalIPBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hInternalPortBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hServCmdBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
+vConfigBox->Add(hDigestTypeBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
+vConfigBox->Add(hHmacTypeBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(save,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 
 OnChoice(*initMessTypeEvent);
@@ -337,6 +369,8 @@ void fwknop_guiFrame::OnSave(wxCommandEvent &event)
     ourConfig->NAT_IP = InternalIPTxt->GetLineText(0);
     ourConfig->NAT_PORT = InternalPortTxt->GetLineText(0);
     ourConfig->SERVER_CMD = ServCmdTxt->GetLineText(0);
+    ourConfig->DIGEST_TYPE = DigestTypeChoice->GetString(DigestTypeChoice->GetSelection()); //Change this for i18n
+    ourConfig->HMAC_TYPE = HmacTypeChoice->GetString(HmacTypeChoice->GetSelection()); //Change this for i18n
 
     wxString result = ourConfig->validateConfig();
     if (result.CmpNoCase(wxT("valid")) == 0)
@@ -620,6 +654,29 @@ void fwknop_guiFrame::populate()
     InternalIPTxt->SetValue(ourConfig->NAT_IP);
     InternalPortTxt->SetValue(ourConfig->NAT_PORT);
     ServCmdTxt->SetValue(ourConfig->SERVER_CMD);
+
+    if (ourConfig->DIGEST_TYPE.CmpNoCase(wxT("MD5")) == 0)
+        DigestTypeChoice->SetSelection(0);
+    else if (ourConfig->DIGEST_TYPE.CmpNoCase(wxT("SHA1")) == 0)
+        DigestTypeChoice->SetSelection(1);
+    else if (ourConfig->DIGEST_TYPE.CmpNoCase(wxT("SHA256")) == 0)
+        DigestTypeChoice->SetSelection(2);
+    else if (ourConfig->DIGEST_TYPE.CmpNoCase(wxT("SHA384")) == 0)
+        DigestTypeChoice->SetSelection(3);
+    else if (ourConfig->DIGEST_TYPE.CmpNoCase(wxT("SHA512")) == 0)
+        DigestTypeChoice->SetSelection(4);
+
+    if (ourConfig->HMAC_TYPE.CmpNoCase(wxT("MD5")) == 0)
+        HmacTypeChoice->SetSelection(0);
+    else if (ourConfig->HMAC_TYPE.CmpNoCase(wxT("SHA1")) == 0)
+        HmacTypeChoice->SetSelection(1);
+    else if (ourConfig->HMAC_TYPE.CmpNoCase(wxT("SHA256")) == 0)
+        HmacTypeChoice->SetSelection(2);
+    else if (ourConfig->HMAC_TYPE.CmpNoCase(wxT("SHA384")) == 0)
+        HmacTypeChoice->SetSelection(3);
+    else if (ourConfig->HMAC_TYPE.CmpNoCase(wxT("SHA512")) == 0)
+        HmacTypeChoice->SetSelection(4);
+
     OnChoice(*initMessTypeEvent);
     OnChoice(*initAllowIPEvent);
     OnChoice(*initCheckboxEvent);

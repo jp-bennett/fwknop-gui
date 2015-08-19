@@ -52,6 +52,18 @@ wxString Config::validateConfig()
         return wxT("Invalid IP to allow."); // Have to have a valid ip to allow, if using allow ip
     } else if (this->MESS_TYPE.CmpNoCase(wxT("Nat Access")) == 0 && !(findIP.Matches(this->NAT_IP) && (0 < wxAtoi(NAT_PORT) && wxAtoi(NAT_PORT) < 65536))) { //NAT_IP must be a valid ip, and NAT_PORT must be a valid port
         return wxT("Invalid NAT ip/port.");
+    } else if (!(this->DIGEST_TYPE.CmpNoCase(wxT("MD5")) == 0
+                || this->DIGEST_TYPE.CmpNoCase(wxT("SHA1")) == 0
+                || this->DIGEST_TYPE.CmpNoCase(wxT("SHA256")) == 0
+                || this->DIGEST_TYPE.CmpNoCase(wxT("SHA384")) == 0
+                || this->DIGEST_TYPE.CmpNoCase(wxT("SHA512")) == 0)) {
+        return wxT("Invalid SPA digest type.");
+    } else if (!(this->HMAC_TYPE.CmpNoCase(wxT("MD5")) == 0
+                || this->HMAC_TYPE.CmpNoCase(wxT("SHA1")) == 0
+                || this->HMAC_TYPE.CmpNoCase(wxT("SHA256")) == 0
+                || this->HMAC_TYPE.CmpNoCase(wxT("SHA384")) == 0
+                || this->HMAC_TYPE.CmpNoCase(wxT("SHA512")) == 0)) {
+        return wxT("Invalid HMAC digest type.");
     } else {
         return wxT("valid");
     }
@@ -75,6 +87,8 @@ configFile->SetPath(wxT("/") + this->NICK_NAME);
     configFile->Write(wxT("NAT_IP"), this->NAT_IP);
     configFile->Write(wxT("NAT_PORT"), this->NAT_PORT);
     configFile->Write(wxT("SERVER_CMD"), this->SERVER_CMD);
+    configFile->Write(wxT("DIGEST_TYPE"), this->DIGEST_TYPE);
+    configFile->Write(wxT("HMAC_TYPE"), this->HMAC_TYPE);
     configFile->Flush();
 
 }
@@ -99,6 +113,8 @@ void Config::loadConfig(wxString Nick, wxFileConfig *configFile)
     this->NAT_IP = configFile->Read(wxT("NAT_IP"));
     this->NAT_PORT = configFile->Read(wxT("NAT_PORT"));
     this->SERVER_CMD = configFile->Read(wxT("SERVER_CMD"));
+    this->DIGEST_TYPE = configFile->Read(wxT("DIGEST_TYPE"));
+    this->HMAC_TYPE = configFile->Read(wxT("HMAC_TYPE"));
 
 
 }
@@ -122,6 +138,8 @@ void Config::defaultConfig()
     this->NAT_IP = wxEmptyString;
     this->NAT_PORT = wxEmptyString;
     this->SERVER_CMD = wxEmptyString;
+    this->DIGEST_TYPE = wxT("SHA256");
+    this->HMAC_TYPE = wxT("SHA256");
 }
 
 wxString Config::gen_SPA(wxString ip_resolver_url)
@@ -132,6 +150,8 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
     int key_len;
     int hmac_str_len = 0;
     short message_type = FKO_CLIENT_TIMEOUT_NAT_ACCESS_MSG;
+    short digest_type = FKO_DIGEST_SHA256;
+    short hmac_type = FKO_HMAC_SHA256;
     char key_str[129] = {0}, hmac_str[129] = {0};
     char spa_msg[256] = {0};
     char nat_access_str[25] = {0};
@@ -210,7 +230,17 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
 
     }
     if (!this->HMAC.IsEmpty()){
-        if (fko_set_spa_hmac_type(ctx, FKO_DEFAULT_HMAC_MODE) != FKO_SUCCESS)
+        if (this->HMAC_TYPE.CmpNoCase(wxT("MD5"))==0)
+            hmac_type = FKO_HMAC_MD5;
+        else if (this->HMAC_TYPE.CmpNoCase(wxT("SHA1"))==0)
+            hmac_type = FKO_HMAC_SHA1;
+        else if (this->HMAC_TYPE.CmpNoCase(wxT("SHA256"))==0)
+            hmac_type = FKO_HMAC_SHA256;
+        else if (this->HMAC_TYPE.CmpNoCase(wxT("SHA384"))==0)
+            hmac_type = FKO_HMAC_SHA384;
+        else if (this->HMAC_TYPE.CmpNoCase(wxT("SHA512"))==0)
+            hmac_type = FKO_HMAC_SHA512;
+        if (fko_set_spa_hmac_type(ctx, hmac_type) != FKO_SUCCESS)
             return _("Could not set HMAC type.");
 
     }
@@ -221,6 +251,19 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
             return _("Could not set nat access string.");
 
     }
+    if (this->DIGEST_TYPE.CmpNoCase(wxT("MD5"))==0)
+        digest_type = FKO_DIGEST_MD5;
+    else if (this->DIGEST_TYPE.CmpNoCase(wxT("SHA1"))==0)
+        digest_type = FKO_DIGEST_SHA1;
+    else if (this->DIGEST_TYPE.CmpNoCase(wxT("SHA256"))==0)
+        digest_type = FKO_DIGEST_SHA256;
+    else if (this->DIGEST_TYPE.CmpNoCase(wxT("SHA384"))==0)
+        digest_type = FKO_DIGEST_SHA384;
+    else if (this->DIGEST_TYPE.CmpNoCase(wxT("SHA512"))==0)
+        digest_type = FKO_DIGEST_SHA512;
+    if (fko_set_spa_digest_type(ctx, digest_type) != FKO_SUCCESS)
+        return _("Could not set SPA digest type.");
+
     if (fko_spa_data_final(ctx, key_str, key_len, hmac_str, hmac_str_len) != FKO_SUCCESS)
         return _("Could not generate SPA data.");
 

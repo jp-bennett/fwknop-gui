@@ -31,6 +31,9 @@ class Config
         wxString NAT_PORT;
         wxString SERVER_CMD;
         wxString SPA_STRING;
+        wxString DIGEST_TYPE;
+        wxString HMAC_TYPE;
+
 
         void getAllConfigs(wxArrayString * configs, wxFileConfig *configFile);
         wxString validateConfig();
