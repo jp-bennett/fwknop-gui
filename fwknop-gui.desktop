@@ -1,0 +1,9 @@
+[Desktop Entry]
+Name=Fwknop-gui
+GenericName=fwknop-gui
+Comment=send spa packets
+Exec=fwknop-gui
+Icon=fwknop-gui
+Terminal=false
+Type=Application
+Categories=Network;
