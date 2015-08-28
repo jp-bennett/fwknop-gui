@@ -54,6 +54,8 @@ class fwknop_guiFrame: public wxFrame
         wxTextCtrl *InternalIPTxt;
         wxTextCtrl *InternalPortTxt;
         wxTextCtrl *ServCmdTxt;
+        wxChoice *DigestTypeChoice;
+        wxChoice *HmacTypeChoice;
         wxCommandEvent *initMessTypeEvent;
         wxCommandEvent *initAllowIPEvent;
         wxCommandEvent *initCheckboxEvent;
@@ -75,8 +77,11 @@ class fwknop_guiFrame: public wxFrame
             ID_List,
             ID_KnockButton,
             ID_Random,
+            ID_DigestType,
+            ID_HmacType,
             ID_html
         };
+        
         void populate();
         void OnClose(wxCloseEvent& event);
         void OnQuit(wxCommandEvent& event);
