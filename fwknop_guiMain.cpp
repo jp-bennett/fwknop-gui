@@ -94,7 +94,6 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
 // So this will be where we set up the gui. All the interesting things will happen in event handlers
 
 
-wxPanel *configPanel = new wxPanel(this, wxID_ANY);
 curl_global_init(CURL_GLOBAL_DEFAULT);
 wxColour *BackGround = new wxColour(233,233,233);
 this->SetBackgroundColour(*BackGround);
@@ -102,6 +101,8 @@ this->SetBackgroundColour(*BackGround);
 hbox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *vListBox = new wxBoxSizer(wxVERTICAL);
 vConfigBox = new wxBoxSizer(wxVERTICAL);
+wxScrolledWindow *vConfigScroll = new wxScrolledWindow(this);
+
 
 //The following are the sizers for each line of config:
 wxBoxSizer *hNickBox = new wxBoxSizer(wxHORIZONTAL);
@@ -133,68 +134,68 @@ ourConfigList = new wxArrayString;
 ourConfig = new Config;
 
 
-wxButton *save = new wxButton(configPanel, ID_SaveButton, wxT("Save Config"));
+wxButton *save = new wxButton(vConfigScroll, ID_SaveButton, wxT("Save Config"));
 
 
-wxStaticText *NickLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Nickname: "));
-NickTxt = new wxTextCtrl(configPanel, wxID_ANY);
+wxStaticText *NickLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Nickname: "));
+NickTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
 
 hNickBox->Add(NickLbl,0,wxALIGN_BOTTOM);
 hNickBox->Add(NickTxt,1, wxEXPAND);
 
 
-wxStaticText *ServAddrLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Server Address: "));
-ServAddrTxt = new wxTextCtrl(configPanel, wxID_ANY);
+wxStaticText *ServAddrLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Server Address: "));
+ServAddrTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
 
 hServAddrBox->Add(ServAddrLbl,0,wxALIGN_BOTTOM);
 hServAddrBox->Add(ServAddrTxt,1, wxEXPAND);
 
 
-LegacyChk = new wxCheckBox(configPanel, wxID_ANY,wxT("Use Legacy Mode"));
+LegacyChk = new wxCheckBox(vConfigScroll, wxID_ANY,wxT("Use Legacy Mode"));
 hLegacyBox->Add(LegacyChk);
 
-RandomChk = new wxCheckBox(configPanel, ID_Random,wxT("Use Random Port"));
+RandomChk = new wxCheckBox(vConfigScroll, ID_Random,wxT("Use Random Port"));
 hRandomBox->Add(RandomChk);
 
-wxStaticText *ServPortLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Server Port: "));
-ServPortTxt = new wxTextCtrl(configPanel, wxID_ANY,wxT("62201"));
+wxStaticText *ServPortLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Server Port: "));
+ServPortTxt = new wxTextCtrl(vConfigScroll, wxID_ANY,wxT("62201"));
 
 hServPortBox->Add(ServPortLbl,0,wxALIGN_BOTTOM);
 hServPortBox->Add(ServPortTxt,1, wxEXPAND);
 
 
-wxStaticText *ProtoLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Protocol: "));
+wxStaticText *ProtoLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Protocol: "));
 
 wxArrayString Protos;
 Protos.Add(wxT("UDP"));
 Protos.Add(wxT("TCP"));
 Protos.Add(wxT("HTTP"));
-ProtoChoice = new wxChoice(configPanel,wxID_ANY, wxDefaultPosition, wxDefaultSize,
+ProtoChoice = new wxChoice(vConfigScroll,wxID_ANY, wxDefaultPosition, wxDefaultSize,
    Protos);
 
 hProtoBox->Add(ProtoLbl,0,wxALIGN_BOTTOM);
 hProtoBox->Add(ProtoChoice);
 ProtoChoice->SetSelection(0);
 
-wxStaticText *KeyLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Rijndael Key: "));
-KeyTxt = new wxTextCtrl(configPanel, wxID_ANY);
+wxStaticText *KeyLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Rijndael Key: "));
+KeyTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
 
 hKeyBox->Add(KeyLbl,0,wxALIGN_BOTTOM);
 hKeyBox->Add(KeyTxt,1, wxEXPAND);
 
 
-KeyB64Chk = new wxCheckBox(configPanel, wxID_ANY,wxT("Key Is Base 64"));
+KeyB64Chk = new wxCheckBox(vConfigScroll, wxID_ANY,wxT("Key Is Base 64"));
 
 hKeyB64Box->Add(KeyB64Chk);
 
-wxStaticText *DigestTypeLbl = new wxStaticText(configPanel,wxID_ANY, wxT("SPA Digest Type: "));
+wxStaticText *DigestTypeLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("SPA Digest Type: "));
 wxArrayString DigestType;
 DigestType.Add(wxT("MD5"));
 DigestType.Add(wxT("SHA1"));
 DigestType.Add(wxT("SHA256"));
 DigestType.Add(wxT("SHA384"));
 DigestType.Add(wxT("SHA512"));
-DigestTypeChoice = new wxChoice(configPanel, ID_DigestType, wxDefaultPosition, wxDefaultSize,
+DigestTypeChoice = new wxChoice(vConfigScroll, ID_DigestType, wxDefaultPosition, wxDefaultSize,
    DigestType);
 
 hDigestTypeBox->Add(DigestTypeLbl,0,wxALIGN_BOTTOM);
@@ -203,42 +204,42 @@ DigestTypeChoice->SetSelection(2);
 
 
 
-wxStaticText *HmacKeyLbl = new wxStaticText(configPanel,wxID_ANY, wxT("HMAC Key: "));
-HmacKeyTxt = new wxTextCtrl(configPanel, wxID_ANY);
+wxStaticText *HmacKeyLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("HMAC Key: "));
+HmacKeyTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
 
 hHmacKeyBox->Add(HmacKeyLbl,0,wxALIGN_BOTTOM);
 hHmacKeyBox->Add(HmacKeyTxt,1, wxEXPAND);
 
 
-HmacKeyB64Chk = new wxCheckBox(configPanel, wxID_ANY,wxT("HMAC Is Base 64"));
+HmacKeyB64Chk = new wxCheckBox(vConfigScroll, wxID_ANY,wxT("HMAC Is Base 64"));
 
 hHmacB64Box->Add(HmacKeyB64Chk);
 
 
 
 
-wxStaticText *HmacTypeLbl = new wxStaticText(configPanel,wxID_ANY, wxT("SPA HMAC Type: "));
+wxStaticText *HmacTypeLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("SPA HMAC Type: "));
 wxArrayString HmacType;
 HmacType.Add(wxT("MD5"));
 HmacType.Add(wxT("SHA1"));
 HmacType.Add(wxT("SHA256"));
 HmacType.Add(wxT("SHA384"));
 HmacType.Add(wxT("SHA512"));
-HmacTypeChoice = new wxChoice(configPanel, ID_HmacType, wxDefaultPosition, wxDefaultSize,
+HmacTypeChoice = new wxChoice(vConfigScroll, ID_HmacType, wxDefaultPosition, wxDefaultSize,
    HmacType);
 
 hHmacTypeBox->Add(HmacTypeLbl,0,wxALIGN_BOTTOM);
 hHmacTypeBox->Add(HmacTypeChoice);
 HmacTypeChoice->SetSelection(2);
 
-wxStaticText *AllowIPLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Allow IP: "));
+wxStaticText *AllowIPLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Allow IP: "));
 
 wxArrayString AllowIP;
 AllowIP.Add(wxT("Resolve IP"));
 AllowIP.Add(wxT("Source IP"));
 AllowIP.Add(wxT("Allow IP"));
 
-AllowIPChoice = new wxChoice(configPanel, ID_AllowIP, wxDefaultPosition, wxDefaultSize,
+AllowIPChoice = new wxChoice(vConfigScroll, ID_AllowIP, wxDefaultPosition, wxDefaultSize,
    AllowIP);
 
 
@@ -246,20 +247,20 @@ hAllowIPBox->Add(AllowIPLbl,0,wxALIGN_BOTTOM);
 hAllowIPBox->Add(AllowIPChoice);
 AllowIPChoice->SetSelection(0);
 
-wxStaticText *IPToAllowLbl = new wxStaticText(configPanel,wxID_ANY, wxT("IP To Allow: "));
-IPToAllowTxt = new wxTextCtrl(configPanel, wxID_ANY);
+wxStaticText *IPToAllowLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("IP To Allow: "));
+IPToAllowTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
 
 hIPToAllowBox->Add(IPToAllowLbl,0,wxALIGN_BOTTOM);
 hIPToAllowBox->Add(IPToAllowTxt,1, wxEXPAND);
 
 
-wxStaticText *MessTypeLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Message Type: "));
+wxStaticText *MessTypeLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Message Type: "));
 
 wxArrayString MessType;
 MessType.Add(wxT("Open Port"));
 MessType.Add(wxT("Nat Access"));
 MessType.Add(wxT("Server Command"));
-MessTypeChoice = new wxChoice(configPanel,ID_MessType, wxDefaultPosition, wxDefaultSize,
+MessTypeChoice = new wxChoice(vConfigScroll,ID_MessType, wxDefaultPosition, wxDefaultSize,
    MessType);
 
 hMessTypeBox->Add(MessTypeLbl,0,wxALIGN_BOTTOM);
@@ -267,47 +268,47 @@ hMessTypeBox->Add(MessTypeChoice);
 MessTypeChoice->SetSelection(0);
 
 
-wxStaticText *AccessPortsLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Access Ports: "));
-AccessPortsTxt = new wxTextCtrl(configPanel, wxID_ANY, wxT("tcp/22"));
+wxStaticText *AccessPortsLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Access Ports: "));
+AccessPortsTxt = new wxTextCtrl(vConfigScroll, wxID_ANY, wxT("tcp/22"));
 
 hAccessPortsBox->Add(AccessPortsLbl,0,wxALIGN_BOTTOM);
 hAccessPortsBox->Add(AccessPortsTxt,1, wxEXPAND);
 
 
-wxStaticText *FwTimeLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Firewall Timeout: "));
-FwTimeTxt = new wxTextCtrl(configPanel, wxID_ANY, wxT("60"));
+wxStaticText *FwTimeLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Firewall Timeout: "));
+FwTimeTxt = new wxTextCtrl(vConfigScroll, wxID_ANY, wxT("60"));
 
 hFwTimeBox->Add(FwTimeLbl,0,wxALIGN_BOTTOM);
 hFwTimeBox->Add(FwTimeTxt,1, wxEXPAND);
 
 
-wxStaticText *InternalIPLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Internal IP: "));
-InternalIPTxt = new wxTextCtrl(configPanel, wxID_ANY);
+wxStaticText *InternalIPLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Internal IP: "));
+InternalIPTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
 
 hInternalIPBox->Add(InternalIPLbl,0,wxALIGN_BOTTOM);
 hInternalIPBox->Add(InternalIPTxt,1, wxEXPAND);
 
 
-wxStaticText *InternalPortLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Internal Port: "));
-InternalPortTxt = new wxTextCtrl(configPanel, wxID_ANY);
+wxStaticText *InternalPortLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Internal Port: "));
+InternalPortTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
 
 hInternalPortBox->Add(InternalPortLbl,0,wxALIGN_BOTTOM);
 hInternalPortBox->Add(InternalPortTxt,1, wxEXPAND);
 
 
-wxStaticText *ServCmdLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Server Command: "));
-ServCmdTxt = new wxTextCtrl(configPanel, wxID_ANY);
+wxStaticText *ServCmdLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Server Command: "));
+ServCmdTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
 
 hServCmdBox->Add(ServCmdLbl,0,wxALIGN_BOTTOM);
 hServCmdBox->Add(ServCmdTxt,1, wxEXPAND);
 
 
 
-listbox = new wxListBox(configPanel, ID_List, wxPoint(-1, -1), wxSize(200, -1));
+listbox = new wxListBox(this, ID_List, wxPoint(-1, -1), wxSize(200, -1));
 ourConfig->getAllConfigs(ourConfigList, configFile);
 listbox->InsertItems(*ourConfigList,0);
 
-wxButton *ok = new wxButton(configPanel, ID_KnockButton, wxT("Send Knock"));
+wxButton *ok = new wxButton(this, ID_KnockButton, wxT("Send Knock"));
 
 
 
@@ -342,8 +343,12 @@ vConfigBox->Add(save,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 OnChoice(*initMessTypeEvent);
 OnChoice(*initAllowIPEvent);
 
-hbox->Add(vConfigBox, 1, wxALIGN_CENTER_HORIZONTAL | wxTOP, 5);
-configPanel->SetSizer(hbox);
+vConfigScroll->SetSizer(vConfigBox);
+vConfigScroll->FitInside(); // ask the sizer about the needed size
+vConfigScroll->SetScrollRate(5, 5);
+
+hbox->Add(vConfigScroll, 1, wxALIGN_CENTER_HORIZONTAL | wxTOP | wxEXPAND, 5);
+this->SetSizer(hbox);
 
 }
 
