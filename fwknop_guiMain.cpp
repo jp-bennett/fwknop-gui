@@ -481,6 +481,9 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
         ourConfig->KEY = wxGetPasswordFromUser(_("Please enter your Rijndael key"));
 
+    if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
+        return;
+
     configFile->SetPath(wxT("/"));
     SPA_Result = ourConfig->gen_SPA(configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")));
     if (SPA_Result.Cmp(wxT("Success")) != 0 ) {
