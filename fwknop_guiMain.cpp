@@ -76,6 +76,12 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
     fileMenu->Append(idMenuQuit, _("&Quit\tAlt-F4"), _("Quit the application"));
     mbar->Append(fileMenu, _("&File"));
 
+    wxMenu* toolsMenu = new wxMenu(_T(""));
+    toolsMenu->Append(idMenuWizard, _("&Access.conf wizard"));
+    toolsMenu->Append(idMenuImport, _("&Import from .rc file"));
+    toolsMenu->Append(idMenuExport, _("&Export to .rc file"));
+    mbar->Append(toolsMenu, _("&Tools"));
+
     wxMenu* helpMenu = new wxMenu(_T(""));
     helpMenu->Append(idMenuAbout, _("&About\tF1"), _("Show info about this application"));
     helpMenu->Append(idMenuHelpScreen, _("&Help Screen"), _("Show help screen"));
@@ -181,6 +187,21 @@ KeyB64Chk = new wxCheckBox(configPanel, wxID_ANY,wxT("Key Is Base 64"));
 
 hKeyB64Box->Add(KeyB64Chk);
 
+wxStaticText *DigestTypeLbl = new wxStaticText(configPanel,wxID_ANY, wxT("SPA Digest Type: "));
+wxArrayString DigestType;
+DigestType.Add(wxT("MD5"));
+DigestType.Add(wxT("SHA1"));
+DigestType.Add(wxT("SHA256"));
+DigestType.Add(wxT("SHA384"));
+DigestType.Add(wxT("SHA512"));
+DigestTypeChoice = new wxChoice(configPanel, ID_DigestType, wxDefaultPosition, wxDefaultSize,
+   DigestType);
+
+hDigestTypeBox->Add(DigestTypeLbl,0,wxALIGN_BOTTOM);
+hDigestTypeBox->Add(DigestTypeChoice);
+DigestTypeChoice->SetSelection(2);
+
+
 
 wxStaticText *HmacKeyLbl = new wxStaticText(configPanel,wxID_ANY, wxT("HMAC Key: "));
 HmacKeyTxt = new wxTextCtrl(configPanel, wxID_ANY);
@@ -193,6 +214,22 @@ HmacKeyB64Chk = new wxCheckBox(configPanel, wxID_ANY,wxT("HMAC Is Base 64"));
 
 hHmacB64Box->Add(HmacKeyB64Chk);
 
+
+
+
+wxStaticText *HmacTypeLbl = new wxStaticText(configPanel,wxID_ANY, wxT("SPA HMAC Type: "));
+wxArrayString HmacType;
+HmacType.Add(wxT("MD5"));
+HmacType.Add(wxT("SHA1"));
+HmacType.Add(wxT("SHA256"));
+HmacType.Add(wxT("SHA384"));
+HmacType.Add(wxT("SHA512"));
+HmacTypeChoice = new wxChoice(configPanel, ID_HmacType, wxDefaultPosition, wxDefaultSize,
+   HmacType);
+
+hHmacTypeBox->Add(HmacTypeLbl,0,wxALIGN_BOTTOM);
+hHmacTypeBox->Add(HmacTypeChoice);
+HmacTypeChoice->SetSelection(2);
 
 wxStaticText *AllowIPLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Allow IP: "));
 
@@ -230,8 +267,6 @@ hMessTypeBox->Add(MessTypeChoice);
 MessTypeChoice->SetSelection(0);
 
 
-
-
 wxStaticText *AccessPortsLbl = new wxStaticText(configPanel,wxID_ANY, wxT("Access Ports: "));
 AccessPortsTxt = new wxTextCtrl(configPanel, wxID_ANY, wxT("tcp/22"));
 
@@ -266,33 +301,7 @@ ServCmdTxt = new wxTextCtrl(configPanel, wxID_ANY);
 hServCmdBox->Add(ServCmdLbl,0,wxALIGN_BOTTOM);
 hServCmdBox->Add(ServCmdTxt,1, wxEXPAND);
 
-wxStaticText *DigestTypeLbl = new wxStaticText(configPanel,wxID_ANY, wxT("SPA Digest Type: "));
-wxArrayString DigestType;
-DigestType.Add(wxT("MD5"));
-DigestType.Add(wxT("SHA1"));
-DigestType.Add(wxT("SHA256"));
-DigestType.Add(wxT("SHA384"));
-DigestType.Add(wxT("SHA512"));
-DigestTypeChoice = new wxChoice(configPanel, ID_DigestType, wxDefaultPosition, wxDefaultSize,
-   DigestType);
 
-hDigestTypeBox->Add(DigestTypeLbl,0,wxALIGN_BOTTOM);
-hDigestTypeBox->Add(DigestTypeChoice);
-DigestTypeChoice->SetSelection(2);
-
-wxStaticText *HmacTypeLbl = new wxStaticText(configPanel,wxID_ANY, wxT("SPA HMAC Type: "));
-wxArrayString HmacType;
-HmacType.Add(wxT("MD5"));
-HmacType.Add(wxT("SHA1"));
-HmacType.Add(wxT("SHA256"));
-HmacType.Add(wxT("SHA384"));
-HmacType.Add(wxT("SHA512"));
-HmacTypeChoice = new wxChoice(configPanel, ID_HmacType, wxDefaultPosition, wxDefaultSize,
-   HmacType);
-
-hHmacTypeBox->Add(HmacTypeLbl,0,wxALIGN_BOTTOM);
-hHmacTypeBox->Add(HmacTypeChoice);
-HmacTypeChoice->SetSelection(2);
 
 listbox = new wxListBox(configPanel, ID_List, wxPoint(-1, -1), wxSize(200, -1));
 ourConfig->getAllConfigs(ourConfigList, configFile);
@@ -316,8 +325,10 @@ vConfigBox->Add(hServPortBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hProtoBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hKeyBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hKeyB64Box,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
+vConfigBox->Add(hDigestTypeBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hHmacKeyBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hHmacB64Box,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
+vConfigBox->Add(hHmacTypeBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hAllowIPBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hIPToAllowBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hMessTypeBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
@@ -326,8 +337,6 @@ vConfigBox->Add(hFwTimeBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hInternalIPBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hInternalPortBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hServCmdBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
-vConfigBox->Add(hDigestTypeBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
-vConfigBox->Add(hHmacTypeBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(save,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 
 OnChoice(*initMessTypeEvent);

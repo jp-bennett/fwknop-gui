@@ -71,6 +71,9 @@ class fwknop_guiFrame: public wxFrame
             idMenuSettings,
             idMenuNew,
             idMenuDelete,
+            idMenuWizard,
+            idMenuImport,
+            idMenuExport,
             ID_AllowIP,
             ID_MessType,
             ID_SaveButton,
@@ -81,7 +84,7 @@ class fwknop_guiFrame: public wxFrame
             ID_HmacType,
             ID_html
         };
-        
+
         void populate();
         void OnClose(wxCloseEvent& event);
         void OnQuit(wxCommandEvent& event);
