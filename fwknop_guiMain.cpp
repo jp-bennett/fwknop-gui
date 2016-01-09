@@ -179,6 +179,7 @@ ProtoChoice->SetSelection(0);
 
 wxStaticText *KeyLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Rijndael Key: "));
 KeyTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
+KeyTxt->SetWindowStyleFlag(wxTE_PASSWORD);
 
 hKeyBox->Add(KeyLbl,0,wxALIGN_BOTTOM);
 hKeyBox->Add(KeyTxt,1, wxEXPAND);
@@ -206,6 +207,8 @@ DigestTypeChoice->SetSelection(2);
 
 wxStaticText *HmacKeyLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("HMAC Key: "));
 HmacKeyTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
+HmacKeyTxt->SetWindowStyleFlag(wxTE_PASSWORD);
+
 
 hHmacKeyBox->Add(HmacKeyLbl,0,wxALIGN_BOTTOM);
 hHmacKeyBox->Add(HmacKeyTxt,1, wxEXPAND);
@@ -355,7 +358,6 @@ this->SetSizer(hbox);
 void fwknop_guiFrame::OnSave(wxCommandEvent &event)
 {
 //All sorts of input validation here, port the android code
-//TODO: Move validation into it's own function. Here we just shuffle the data into the class. This would greatly clean up the android code, too.
 
 //also, on android, need to detect changes to the config, because send knock with edits is broken. Similar idea, perhaps.
 
@@ -477,7 +479,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 
     ourConfig->loadConfig(listbox->GetString(listbox->GetSelection()), configFile);
     if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
-        ourConfig->KEY = wxGetTextFromUser(_("Please enter your Rijndael key"));
+        ourConfig->KEY = wxGetPasswordFromUser(_("Please enter your Rijndael key"));
 
     configFile->SetPath(wxT("/"));
     SPA_Result = ourConfig->gen_SPA(configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")));
