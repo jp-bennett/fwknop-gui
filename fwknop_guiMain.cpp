@@ -241,6 +241,7 @@ wxArrayString AllowIP;
 AllowIP.Add(wxT("Resolve IP"));
 AllowIP.Add(wxT("Source IP"));
 AllowIP.Add(wxT("Allow IP"));
+AllowIP.Add(wxT("Prompt IP"));
 
 AllowIPChoice = new wxChoice(vConfigScroll, ID_AllowIP, wxDefaultPosition, wxDefaultSize,
    AllowIP);
@@ -380,6 +381,8 @@ void fwknop_guiFrame::OnSave(wxCommandEvent &event)
         ourConfig->ACCESS_IP = wxT("Resolve IP");
     } else if (AllowIPChoice->GetSelection() == 1) {
         ourConfig->ACCESS_IP = wxT("Source IP");
+    } else if (AllowIPChoice->GetSelection() == 3) {
+        ourConfig->ACCESS_IP = wxT("Prompt IP");
     } else {
         ourConfig->ACCESS_IP = IPToAllowTxt->GetLineText(0);
     }
@@ -482,6 +485,12 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
         ourConfig->KEY = wxGetPasswordFromUser(_("Please enter your Rijndael key"));
 
     if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
+        return;
+
+    if (ourConfig->ACCESS_IP.CmpNoCase("Prompt IP") == 0)
+        ourConfig->ACCESS_IP = wxGetTextFromUser(_("Please enter your Access IP"));
+
+    if (ourConfig->ACCESS_IP.CmpNoCase("") == 0)
         return;
 
     configFile->SetPath(wxT("/"));
@@ -680,6 +689,8 @@ void fwknop_guiFrame::populate()
         AllowIPChoice->SetSelection(0);
     else if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Source IP")) == 0)
         AllowIPChoice->SetSelection(1);
+    else if (ourConfig->ACCESS_IP.CmpNoCase(wxT("Prompt IP")) == 0)
+        AllowIPChoice->SetSelection(3);
     else {
         AllowIPChoice->SetSelection(2);
         IPToAllowTxt->SetValue(ourConfig->ACCESS_IP);
