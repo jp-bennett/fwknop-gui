@@ -487,10 +487,10 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
         return;
 
-    if (ourConfig->ACCESS_IP.CmpNoCase("Prompt IP") == 0)
+    if (ourConfig->ACCESS_IP.CmpNoCase(_("Prompt IP")) == 0)
         ourConfig->ACCESS_IP = wxGetTextFromUser(_("Please enter your Access IP"));
 
-    if (ourConfig->ACCESS_IP.CmpNoCase("") == 0)
+    if (ourConfig->ACCESS_IP.CmpNoCase(wxEmptyString) == 0)
         return;
 
     configFile->SetPath(wxT("/"));

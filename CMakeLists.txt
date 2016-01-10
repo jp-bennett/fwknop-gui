@@ -25,17 +25,20 @@ include_directories(${CMAKE_SOURCE_DIR})
 find_package(LibFko REQUIRED)
 find_package(CURL REQUIRED)
 
-set(CODE_FILES 
+set(CODE_FILES
   ${CODE_FILES}
   configs.cpp
   fwknop_guiApp.cpp
   fwknop_guiMain.cpp
   )
 
+
 add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
   ${CODE_FILES}
   )
 
+SET_TARGET_PROPERTIES(fwknop-gui PROPERTIES POSITION_INDEPENDENT_CODE ON)
+add_definitions(-D_UNICODE)
 
 target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES})
 if(IS_LINUX)
