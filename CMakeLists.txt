@@ -17,7 +17,7 @@ if (IS_WIN32)
   set(CODE_FILES win32/minimal.rc)
 endif()
 
-find_package(wxWidgets 2.8.10 REQUIRED COMPONENTS xml html adv qa richtext net core base)
+find_package(wxWidgets 2.8.10 REQUIRED xml html adv qa richtext net core base)
 
 include(${wxWidgets_USE_FILE})
 include_directories(${CMAKE_SOURCE_DIR})
@@ -40,7 +40,7 @@ add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
 SET_TARGET_PROPERTIES(fwknop-gui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 add_definitions(-D_UNICODE)
 
-target_link_libraries(fwknop-gui ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES} ${wxWidgets_LIBRARIES})
+target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES})
 if(IS_LINUX)
   install(FILES help.html DESTINATION share/fwknop-gui)
   install(TARGETS fwknop-gui DESTINATION bin)
