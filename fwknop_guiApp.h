@@ -27,6 +27,7 @@
 #include <wx/stream.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
+#include <wx/clipbrd.h>
 #include <sstream>
 
 #define MAX_KEY_LEN                 128

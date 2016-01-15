@@ -609,23 +609,41 @@ void fwknop_guiFrame::OnWizard(wxCommandEvent &event)
     wxString access_conf;
     wxString enableCommand;
     wxString keyString;
+    wxString hmacString;
 
     fko_key_gen(generatedKey, FKO_DEFAULT_KEY_LEN, generatedHMAC, FKO_DEFAULT_HMAC_KEY_LEN, FKO_DEFAULT_HMAC_MODE);
 
     wxString userKey = wxGetTextFromUser(_("Set a key here, or leave blank to generate a random base64 key."));
     if (userKey.IsEmpty()){
-    keyString.Printf(_("KEY_BASE64 %s"), generatedKey);
+        keyString = _("KEY_BASE64 ");
+        keyString.Append(wxString::FromAscii(generatedKey));
+        keyString.Append(_("\n"));
     } else {
-    keyString.Printf(_("KEY %s"), userKey);
+        keyString = _("KEY ");
+        keyString.Append(userKey);
+        keyString.Append(_("\n"));
     }
+    hmacString = _("HMAC_KEY_BASE64 ");
+    hmacString.Append(wxString::FromAscii(generatedHMAC));
+    hmacString.Append(_("\n"));
     if (wxMessageBox(_("Enable command messages?"), _("Command messages"), wxYES_NO) == wxYES) {
         enableCommand = _("Y");
         } else {
         enableCommand = _("N");
         }
 
-    access_conf.Printf(_("SOURCE ANY\n%s\nHMAC_KEY_BASE64 %s\nENABLE_CMD_EXEC %s"), keyString, generatedHMAC, enableCommand);
-    wxMessageBox(access_conf);
+    access_conf = _("SOURCE ANY\n");
+    access_conf.Append(keyString);
+    access_conf.Append(hmacString);
+    access_conf.Append(_("ENABLE_CMD_EXEC "));
+    access_conf.Append(enableCommand);
+
+    if (wxTheClipboard->Open()) {
+        wxTheClipboard->SetData( new wxTextDataObject(access_conf) );
+        wxTheClipboard->Close();
+        access_conf.Append(_("\n\nCopied to the clipboard"));
+    }
+    wxMessageBox(access_conf, _("Generated access.conf"));
 }
 
 void fwknop_guiFrame::OnDelete(wxCommandEvent &event)

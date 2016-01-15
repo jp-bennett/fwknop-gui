@@ -210,12 +210,12 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
     {
         message_type = FKO_COMMAND_MSG;
         if (fko_set_spa_message_type(ctx, message_type) != FKO_SUCCESS)
-            return _("Chould not set message type");
+            return _("Could not set message type");
 
         snprintf(spa_msg, 256, "%s,%s", (const char*)this->ACCESS_IP.mb_str(wxConvUTF8), (const char*)this->SERVER_CMD.mb_str(wxConvUTF8));
         res = fko_set_spa_message(ctx, spa_msg);
         if (res != FKO_SUCCESS)
-            return _(fko_errstr(res));
+            return _("Could not set command message");
 
     } else {
         if (fko_set_spa_client_timeout(ctx, wxAtoi(this->SERVER_TIMEOUT)) != FKO_SUCCESS)
