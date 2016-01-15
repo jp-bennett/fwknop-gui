@@ -54,6 +54,7 @@ BEGIN_EVENT_TABLE(fwknop_guiFrame, wxFrame)
     EVT_MENU(idMenuAbout, fwknop_guiFrame::OnAbout)
     EVT_MENU(idMenuHelpScreen, fwknop_guiFrame::OnHelpScreen)
     EVT_MENU(idMenuSettings, fwknop_guiFrame::OnSettings)
+    EVT_MENU(idMenuWizard, fwknop_guiFrame::OnWizard)
     EVT_CHECKBOX(ID_Random, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_AllowIP, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_MessType, fwknop_guiFrame::OnChoice)
@@ -599,6 +600,32 @@ void fwknop_guiFrame::OnSettings(wxCommandEvent &event)
     } else {
         configFile->Write(wxT("ip_resolver_url"),tmp_url);
     }
+}
+
+void fwknop_guiFrame::OnWizard(wxCommandEvent &event)
+{
+    char generatedKey[MAX_B64_KEY_LEN+1];
+    char generatedHMAC[MAX_B64_KEY_LEN+1];
+    wxString access_conf;
+    wxString enableCommand;
+    wxString keyString;
+
+    fko_key_gen(generatedKey, FKO_DEFAULT_KEY_LEN, generatedHMAC, FKO_DEFAULT_HMAC_KEY_LEN, FKO_DEFAULT_HMAC_MODE);
+
+    wxString userKey = wxGetTextFromUser(_("Set a key here, or leave blank to generate a random base64 key."));
+    if (userKey.IsEmpty()){
+    keyString.Printf(_("KEY_BASE64 %s"), generatedKey);
+    } else {
+    keyString.Printf(_("KEY %s"), userKey);
+    }
+    if (wxMessageBox(_("Enable command messages?"), _("Command messages"), wxYES_NO) == wxYES) {
+        enableCommand = _("Y");
+        } else {
+        enableCommand = _("N");
+        }
+
+    access_conf.Printf(_("SOURCE ANY\n%s\nHMAC_KEY_BASE64 %s\nENABLE_CMD_EXEC %s"), keyString, generatedHMAC, enableCommand);
+    wxMessageBox(access_conf);
 }
 
 void fwknop_guiFrame::OnDelete(wxCommandEvent &event)

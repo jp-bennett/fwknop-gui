@@ -29,6 +29,9 @@
 #include <curl/easy.h>
 #include <sstream>
 
+#define MAX_KEY_LEN                 128
+#define MAX_B64_KEY_LEN             180
+
 class fwknop_guiApp : public wxApp
 {
     public:

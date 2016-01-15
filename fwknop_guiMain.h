@@ -93,6 +93,7 @@ class fwknop_guiFrame: public wxFrame
         void OnAbout(wxCommandEvent& event);
         void OnHelpScreen(wxCommandEvent& event);
         void OnSettings(wxCommandEvent& event);
+        void OnWizard(wxCommandEvent& event);
         void OnChoice(wxCommandEvent& event);
         void OnSave(wxCommandEvent& event);
         void OnLoad(wxCommandEvent& event);
