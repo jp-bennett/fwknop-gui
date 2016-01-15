@@ -147,7 +147,7 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
     CURLcode curl_Res;
     fko_ctx_t ctx;
     fwknop_options_t opts;
-    int key_len;
+    int key_len, res;
     int hmac_str_len = 0;
     short message_type = FKO_CLIENT_TIMEOUT_NAT_ACCESS_MSG;
     short digest_type = FKO_DIGEST_SHA256;
@@ -181,7 +181,7 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
             if (!findIP.Matches(result_tmp))
                 return _("Unable to resolve our IP!");
 
-            this->ACCESS_IP =findIP.GetMatch(result_tmp);
+            this->ACCESS_IP = findIP.GetMatch(result_tmp);
         } else
             return _("Libcurl returned the error: ") + wxString::FromUTF8(curl_easy_strerror(curl_Res));
 
@@ -206,14 +206,16 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
     if (fko_new(&ctx) != FKO_SUCCESS)
         return _("Could not get new FKO context");
 
-    if (!this->SERVER_CMD.IsEmpty())
+    if (MESS_TYPE.CmpNoCase(wxT("Server Command")) == 0)
     {
         message_type = FKO_COMMAND_MSG;
         if (fko_set_spa_message_type(ctx, message_type) != FKO_SUCCESS)
             return _("Chould not set message type");
 
-        if (fko_set_spa_message(ctx, this->SERVER_CMD.mb_str()) != FKO_SUCCESS)
-            return _("Could not set server command");
+        snprintf(spa_msg, 256, "%s,%s", (const char*)this->ACCESS_IP.mb_str(wxConvUTF8), (const char*)this->SERVER_CMD.mb_str(wxConvUTF8));
+        res = fko_set_spa_message(ctx, spa_msg);
+        if (res != FKO_SUCCESS)
+            return _(fko_errstr(res));
 
     } else {
         if (fko_set_spa_client_timeout(ctx, wxAtoi(this->SERVER_TIMEOUT)) != FKO_SUCCESS)
@@ -244,12 +246,19 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
             return _("Could not set HMAC type.");
 
     }
-    if (!this->NAT_IP.IsEmpty())
+    if (this->MESS_TYPE.CmpNoCase(wxT("Nat Access")) == 0)
     {
         sprintf(nat_access_str, "%s,%s", (const char*)this->NAT_IP.mb_str(wxConvUTF8), (const char*)this->NAT_PORT.mb_str(wxConvUTF8));
         if (fko_set_spa_nat_access(ctx, nat_access_str) != FKO_SUCCESS)
             return _("Could not set nat access string.");
 
+    } else if (this->MESS_TYPE.CmpNoCase(wxT("Local Nat Access")) == 0) {
+        message_type = FKO_CLIENT_TIMEOUT_LOCAL_NAT_ACCESS_MSG;
+        if (fko_set_spa_message_type(ctx, message_type) != FKO_SUCCESS)
+        return _("Chould not set message type");
+        sprintf(nat_access_str, "%s,%s", (const char*)this->SERVER_IP.mb_str(wxConvUTF8), (const char*)this->NAT_PORT.mb_str(wxConvUTF8));
+        if (fko_set_spa_nat_access(ctx, nat_access_str) != FKO_SUCCESS)
+            return _("Could not set nat access string.");
     }
     if (this->DIGEST_TYPE.CmpNoCase(wxT("MD5"))==0)
         digest_type = FKO_DIGEST_MD5;

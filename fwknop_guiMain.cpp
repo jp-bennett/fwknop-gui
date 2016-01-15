@@ -263,6 +263,7 @@ wxStaticText *MessTypeLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Messag
 wxArrayString MessType;
 MessType.Add(wxT("Open Port"));
 MessType.Add(wxT("Nat Access"));
+MessType.Add(wxT("Local Nat Access"));
 MessType.Add(wxT("Server Command"));
 MessTypeChoice = new wxChoice(vConfigScroll,ID_MessType, wxDefaultPosition, wxDefaultSize,
    MessType);
@@ -450,6 +451,13 @@ void fwknop_guiFrame::OnChoice(wxCommandEvent &event)
             vConfigBox->Hide(hServCmdBox);
         break;
         case 2:
+            vConfigBox->Show(hAccessPortsBox);
+            vConfigBox->Show(hFwTimeBox);
+            vConfigBox->Hide(hInternalIPBox);
+            vConfigBox->Show(hInternalPortBox);
+            vConfigBox->Hide(hServCmdBox);
+        break;
+        case 3:
             vConfigBox->Show(hServCmdBox);
             vConfigBox->Hide(hAccessPortsBox);
             vConfigBox->Hide(hFwTimeBox);
@@ -470,6 +478,9 @@ void fwknop_guiFrame::OnLoad(wxCommandEvent &event)
 
 void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 {
+    wxIPV4address serverAddr;
+    wxString serverHost;
+
     if (listbox->GetSelection() == wxNOT_FOUND) // want to return before even using the memory if nothing is selected
     {
         wxMessageBox(_("No config selected!"));
@@ -493,69 +504,67 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     if (ourConfig->ACCESS_IP.CmpNoCase(wxEmptyString) == 0)
         return;
 
+    if (!serverAddr.Hostname(ourConfig->SERVER_IP)) {
+        wxMessageBox(_("Could not resolve server!"));
+        return;
+    }
+    serverHost = ourConfig->SERVER_IP; //HTTP and eventually HTTPS should be sent to the hostname rather than the IP
+    ourConfig->SERVER_IP = serverAddr.IPAddress();
+
     configFile->SetPath(wxT("/"));
     SPA_Result = ourConfig->gen_SPA(configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")));
     if (SPA_Result.Cmp(wxT("Success")) != 0 ) {
-    wxMessageBox(SPA_Result);
-    return;
+        wxMessageBox(SPA_Result);
+        return;
     }
 
     if (ourConfig->PROTOCOL.CmpNoCase(wxT("UDP")) == 0) {
-        wxIPV4address serverAddr;
+
         wxIPV4address ourAddr;
         ourAddr.AnyAddress();
         ourAddr.Service(0);
-        if (serverAddr.Hostname(ourConfig->SERVER_IP))
-        {
-            if (serverAddr.Service(ourConfig->SERVER_PORT))
-            {
-                wxDatagramSocket *m_socket;
-                m_socket = new wxDatagramSocket(ourAddr, wxSOCKET_NOWAIT);
-                m_socket->SendTo(serverAddr, ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
-                m_socket->WaitForWrite();
-                if (m_socket->Error()) {
-                    wxMessageBox(_("Could not send knock: Error sending."));
-                } else {
-                    wxMessageBox(_("Knock sent successfully."));
-                }
-                m_socket->Destroy();
 
-            } else
-                wxMessageBox(_("Could not send knock: could not set server port."));
+        if (serverAddr.Service(ourConfig->SERVER_PORT))
+        {
+            wxDatagramSocket *m_socket;
+            m_socket = new wxDatagramSocket(ourAddr, wxSOCKET_NOWAIT);
+            m_socket->SendTo(serverAddr, ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
+            m_socket->WaitForWrite();
+            if (m_socket->Error()) {
+                wxMessageBox(_("Could not send knock: Error sending."));
+            } else {
+                wxMessageBox(_("Knock sent successfully."));
+            }
+            m_socket->Destroy();
 
         } else
-            wxMessageBox(_("Could not send knock: could not set server address."));
+            wxMessageBox(_("Could not send knock: could not set server port."));
 
     } else if (ourConfig->PROTOCOL.CmpNoCase(wxT("TCP")) == 0) {
-        wxIPV4address tcp_serverAddr;
         wxIPV4address ourAddr;
         ourAddr.AnyAddress();
         ourAddr.Service(0);
-        if (tcp_serverAddr.Hostname(ourConfig->SERVER_IP))
-        {
-            if (tcp_serverAddr.Service(ourConfig->SERVER_PORT))
-            {
-                wxSocketClient *tcp_socket = new wxSocketClient;
-                tcp_socket->Connect(tcp_serverAddr);
-                tcp_socket->WaitForWrite();
-                tcp_socket->Write(ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
-                tcp_socket->WaitForWrite();
-                if (tcp_socket->Error()) {
-                    wxMessageBox(_("Could not send knock: Error sending."));
-                } else {
-                    wxMessageBox(_("Knock sent successfully."));
-                }
-                tcp_socket->Destroy();
 
-            } else
-            wxMessageBox(_("Could not send knock: could not set server address."));
+        if (serverAddr.Service(ourConfig->SERVER_PORT))
+        {
+            wxSocketClient *tcp_socket = new wxSocketClient;
+            tcp_socket->Connect(serverAddr);
+            tcp_socket->WaitForWrite();
+            tcp_socket->Write(ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
+            tcp_socket->WaitForWrite();
+            if (tcp_socket->Error()) {
+                wxMessageBox(_("Could not send knock: Error sending."));
+            } else {
+                wxMessageBox(_("Knock sent successfully."));
+            }
+            tcp_socket->Destroy();
 
         } else
-            wxMessageBox(_("Could not send knock: could not set server address."));
+        wxMessageBox(_("Could not send knock: could not set server address."));
 
     } else if (ourConfig->PROTOCOL.CmpNoCase(wxT("HTTP")) == 0) {
         wxHTTP *http_serv = new wxHTTP;
-        http_serv->Connect(ourConfig->SERVER_IP, wxAtoi(ourConfig->SERVER_PORT));
+        http_serv->Connect(serverHost, wxAtoi(ourConfig->SERVER_PORT));
         wxInputStream *tmp_stream;
         tmp_stream = http_serv->GetInputStream(ourConfig->SPA_STRING);
         delete tmp_stream;
@@ -700,8 +709,10 @@ void fwknop_guiFrame::populate()
         MessTypeChoice->SetSelection(0);
     else if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Nat Access")) == 0)
         MessTypeChoice->SetSelection(1);
-    else if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Server Command")) == 0)
+    else if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Local Nat Access")) == 0)
         MessTypeChoice->SetSelection(2);
+    else if (ourConfig->MESS_TYPE.CmpNoCase(wxT("Server Command")) == 0)
+        MessTypeChoice->SetSelection(3);
 
     AccessPortsTxt->SetValue(ourConfig->PORTS);
     FwTimeTxt->SetValue(ourConfig->SERVER_TIMEOUT);
