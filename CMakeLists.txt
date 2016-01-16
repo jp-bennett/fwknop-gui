@@ -30,6 +30,7 @@ set(CODE_FILES
   configs.cpp
   fwknop_guiApp.cpp
   fwknop_guiMain.cpp
+  wizard.cpp
   )
 
 
@@ -37,8 +38,6 @@ add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
   ${CODE_FILES}
   )
 
-SET_TARGET_PROPERTIES(fwknop-gui PROPERTIES POSITION_INDEPENDENT_CODE ON)
-add_definitions(-D_UNICODE)
 
 target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES})
 if(IS_LINUX)
@@ -48,7 +47,8 @@ if(IS_LINUX)
   install(FILES fwknop-gui.png DESTINATION share/pixmaps)
 endif()
 if(IS_WIN32)
-  set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} -static-libgcc -static-libstdc++ -static")
+  target_link_libraries(fwknop-gui wsock32 ws2_32 ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES})
+  set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
 endif()
 if(IS_APPLE)
     INSTALL(CODE "

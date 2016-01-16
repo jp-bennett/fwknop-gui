@@ -27,11 +27,10 @@
 #include <wx/stream.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
-#include <wx/clipbrd.h>
 #include <sstream>
+#include <wx/choicdlg.h>
 
-#define MAX_KEY_LEN                 128
-#define MAX_B64_KEY_LEN             180
+
 
 class fwknop_guiApp : public wxApp
 {
