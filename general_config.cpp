@@ -59,6 +59,7 @@ void gConfigDialog::OnOK(wxCommandEvent &event)
         return;
     } else {
         privateConfigFile->Write(wxT("ip_resolver_url"), tmp_url);
+        privateConfigFile->Flush();
         Destroy();
     }
 }
