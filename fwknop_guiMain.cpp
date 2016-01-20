@@ -592,20 +592,24 @@ this->populate();
 
 void fwknop_guiFrame::OnSettings(wxCommandEvent &event)
 {
-    configFile->SetPath(wxT("/"));
-
-    wxString tmp_url = wxGetTextFromUser(_("Url to use to resolve IP. Leave blank to reset to default."), _("Resolve url"), configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")));
-    if (tmp_url.IsEmpty()) {
-        configFile->Write(wxT("ip_resolver_url"), wxT("https://api.ipify.org"));
-    } else {
-        configFile->Write(wxT("ip_resolver_url"),tmp_url);
-    }
+    gConfigDialog *gConfig = new gConfigDialog(configFile);
+    gConfig->Show();
 }
 
 void fwknop_guiFrame::OnWizard(wxCommandEvent &event)
 {
     wizardDialog *wizard = new wizardDialog(_("Access.conf wizard"));
     wizard->Show(true);
+
+    listbox->SetSelection(wxNOT_FOUND);
+    ourConfig->defaultConfig();
+    ourConfig->KEY = wizard->tmp_config->KEY;
+    ourConfig->KEY_BASE64 = wizard->tmp_config->KEY_BASE64;
+    ourConfig->HMAC = wizard->tmp_config->HMAC;
+    ourConfig->HMAC_BASE64 = true;
+    this->populate();
+    wxMessageBox(_("Generated keys imported into a blank config"));
+
 }
 
 void fwknop_guiFrame::OnDelete(wxCommandEvent &event)

@@ -16,7 +16,7 @@
 
 #include "fwknop_guiApp.h"
 #include "wizard.h"
-//#include "configs.h"
+#include "general_config.h"
 
 class fwknop_guiFrame: public wxFrame
 {

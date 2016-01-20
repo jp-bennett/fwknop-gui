@@ -31,6 +31,7 @@ set(CODE_FILES
   fwknop_guiApp.cpp
   fwknop_guiMain.cpp
   wizard.cpp
+  general_config.cpp
   )
 
 
@@ -38,6 +39,7 @@ add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
   ${CODE_FILES}
   )
 
+SET_TARGET_PROPERTIES(fwknop-gui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES})
 if(IS_LINUX)

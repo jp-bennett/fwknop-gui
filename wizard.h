@@ -1,12 +1,15 @@
 #include <wx/wx.h>
 #include <wx/clipbrd.h>
 #include <fko.h>
+#include "configs.h"
 #define MAX_KEY_LEN                 128
 #define MAX_B64_KEY_LEN             180
 class wizardDialog : public wxDialog
 {
 public:
   wizardDialog(const wxString& title);
+
+  Config *tmp_config;
 
 private:
 

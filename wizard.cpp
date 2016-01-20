@@ -11,7 +11,7 @@ wizardDialog::wizardDialog(const wxString & title)
        : wxDialog(NULL, -1, title, wxDefaultPosition, wxSize(900, 330))
 {
 
-
+    tmp_config = new Config;
     fko_key_gen(generatedKey, FKO_DEFAULT_KEY_LEN, generatedHMAC, FKO_DEFAULT_HMAC_KEY_LEN, FKO_DEFAULT_HMAC_MODE);
 
     wxPanel *panel = new wxPanel(this, -1);
@@ -90,6 +90,14 @@ void wizardDialog::OnCopy(wxCommandEvent &event)
 
 void wizardDialog::OnOK(wxCommandEvent &event)
 {
-  Destroy();
+    if (key_txt->GetLineText(0).IsEmpty()){
+    tmp_config->KEY = wxString::FromAscii(generatedKey);
+    tmp_config->KEY_BASE64 = true;
+    } else {
+    tmp_config->KEY = key_txt->GetLineText(0);
+    tmp_config->KEY_BASE64 = false;
+    }
+    tmp_config->HMAC = wxString::FromAscii(generatedHMAC);
+    Destroy();
 }
 

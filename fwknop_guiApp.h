@@ -21,7 +21,6 @@
 #include <wx/wxhtml.h>
 #include <wx/stdpaths.h>
 #include <fko.h>
-#include "configs.h"
 #include <wx/sstream.h>
 #include <wx/protocol/http.h>
 #include <wx/stream.h>
