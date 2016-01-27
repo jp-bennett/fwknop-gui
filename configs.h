@@ -1,5 +1,8 @@
 //Defines the configs class
 //#include "fwknop_guiApp.h"
+#ifndef FWKNOP_CONFIGS
+#define FWKNOP_CONFIGS
+
 #include <wx/app.h>
 #include <wx/fileconf.h>
 #include <wx/socket.h>
@@ -10,6 +13,7 @@
 #include <curl/easy.h>
 #include <sstream>
 #include <fko.h>
+
 
 class Config
 {
@@ -57,3 +61,4 @@ class Config
             char server_command[1024];
         } fwknop_options_t;
 };
+#endif

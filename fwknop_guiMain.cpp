@@ -55,6 +55,9 @@ BEGIN_EVENT_TABLE(fwknop_guiFrame, wxFrame)
     EVT_MENU(idMenuHelpScreen, fwknop_guiFrame::OnHelpScreen)
     EVT_MENU(idMenuSettings, fwknop_guiFrame::OnSettings)
     EVT_MENU(idMenuWizard, fwknop_guiFrame::OnWizard)
+    EVT_MENU(idMenuImport, fwknop_guiFrame::OnImport)
+    EVT_MENU(idMenuExport, fwknop_guiFrame::OnExport)
+    EVT_MENU(idMenuQR, fwknop_guiFrame::OnQR)
     EVT_CHECKBOX(ID_Random, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_AllowIP, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_MessType, fwknop_guiFrame::OnChoice)
@@ -67,7 +70,7 @@ END_EVENT_TABLE()
 fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
     : wxFrame(frame, wxID_ANY, title, wxPoint(-1, -1), wxSize(800, 600))
 {
-#if wxUSE_MENUS
+//#if wxUSE_MENUS
     // create a menu bar
     wxMenuBar* mbar = new wxMenuBar();
     wxMenu* fileMenu = new wxMenu(_T(""));
@@ -79,8 +82,9 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
 
     wxMenu* toolsMenu = new wxMenu(_T(""));
     toolsMenu->Append(idMenuWizard, _("&Access.conf wizard"));
-    toolsMenu->Append(idMenuImport, _("&Import from .rc file"));
-    toolsMenu->Append(idMenuExport, _("&Export to .rc file"));
+    toolsMenu->Append(idMenuImport, _("&Import from fwknoprc file"));
+    toolsMenu->Append(idMenuExport, _("&Export as fwknoprc file"));
+    toolsMenu->Append(idMenuQR, _("&Export as QR code"));
     mbar->Append(toolsMenu, _("&Tools"));
 
     wxMenu* helpMenu = new wxMenu(_T(""));
@@ -89,7 +93,7 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
     mbar->Append(helpMenu, _("&Help"));
 
     SetMenuBar(mbar);
-#endif // wxUSE_MENUS
+//#endif // wxUSE_MENUS
 
 
 // So this will be where we set up the gui. All the interesting things will happen in event handlers
@@ -179,8 +183,8 @@ hProtoBox->Add(ProtoChoice);
 ProtoChoice->SetSelection(0);
 
 wxStaticText *KeyLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Rijndael Key: "));
-KeyTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
-KeyTxt->SetWindowStyleFlag(wxTE_PASSWORD);
+KeyTxt = new wxTextCtrl(vConfigScroll, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
+//KeyTxt->SetWindowStyleFlag(wxTE_PASSWORD);
 
 hKeyBox->Add(KeyLbl,0,wxALIGN_BOTTOM);
 hKeyBox->Add(KeyTxt,1, wxEXPAND);
@@ -207,8 +211,8 @@ DigestTypeChoice->SetSelection(2);
 
 
 wxStaticText *HmacKeyLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("HMAC Key: "));
-HmacKeyTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
-HmacKeyTxt->SetWindowStyleFlag(wxTE_PASSWORD);
+HmacKeyTxt = new wxTextCtrl(vConfigScroll, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
+//HmacKeyTxt->SetWindowStyleFlag(wxTE_PASSWORD);
 
 
 hHmacKeyBox->Add(HmacKeyLbl,0,wxALIGN_BOTTOM);
@@ -584,9 +588,9 @@ fwknop_guiFrame::~fwknop_guiFrame()
 
 void fwknop_guiFrame::OnNew(wxCommandEvent &event)
 {
-listbox->SetSelection(wxNOT_FOUND);
-ourConfig->defaultConfig();
-this->populate();
+    listbox->SetSelection(wxNOT_FOUND);
+    ourConfig->defaultConfig();
+    this->populate();
 
 }
 
@@ -612,6 +616,34 @@ void fwknop_guiFrame::OnWizard(wxCommandEvent &event)
 
 }
 
+void fwknop_guiFrame::OnImport(wxCommandEvent &event)
+{
+    bool is_changed = false;
+    rc_import *import_dialog = new rc_import(_("RC Import"), ourConfig, &is_changed);
+    import_dialog->Show(true);
+    if (is_changed) { //could check for a dup, save if no dupe, message if there is
+        listbox->SetSelection(wxNOT_FOUND);
+        this->populate();
+    }
+
+}
+
+void fwknop_guiFrame::OnExport(wxCommandEvent &event)
+{
+    if (ourConfig != NULL) {
+        rc_export *export_dialog = new rc_export(_("RC Export"), ourConfig);
+        export_dialog->Show(true);
+    }
+}
+
+void fwknop_guiFrame::OnQR(wxCommandEvent &event)
+{
+    if (ourConfig != NULL) {
+        qr_export *qr_export_dialog = new qr_export(_(""), ourConfig);
+        qr_export_dialog->Show(true);
+    }
+}
+
 void fwknop_guiFrame::OnDelete(wxCommandEvent &event)
 {
     if (listbox->GetSelection() == wxNOT_FOUND)
@@ -635,13 +667,13 @@ void fwknop_guiFrame::OnDelete(wxCommandEvent &event)
 
 void fwknop_guiFrame::OnClose(wxCloseEvent &event)
 {
-curl_global_cleanup();
+    curl_global_cleanup();
     Destroy();
 }
 
 void fwknop_guiFrame::OnQuit(wxCommandEvent &event)
 {
-curl_global_cleanup();
+    curl_global_cleanup();
     Destroy();
 }
 

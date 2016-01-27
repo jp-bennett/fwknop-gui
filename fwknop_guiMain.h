@@ -17,7 +17,9 @@
 #include "fwknop_guiApp.h"
 #include "wizard.h"
 #include "general_config.h"
-
+#include "rc_export.h"
+#include "rc_import.h"
+#include "qr_export.h"
 class fwknop_guiFrame: public wxFrame
 {
     public:
@@ -75,6 +77,7 @@ class fwknop_guiFrame: public wxFrame
             idMenuWizard,
             idMenuImport,
             idMenuExport,
+            idMenuQR,
             ID_AllowIP,
             ID_MessType,
             ID_SaveButton,
@@ -95,6 +98,9 @@ class fwknop_guiFrame: public wxFrame
         void OnHelpScreen(wxCommandEvent& event);
         void OnSettings(wxCommandEvent& event);
         void OnWizard(wxCommandEvent& event);
+        void OnImport(wxCommandEvent& event);
+        void OnExport(wxCommandEvent& event);
+        void OnQR(wxCommandEvent& event);
         void OnChoice(wxCommandEvent& event);
         void OnSave(wxCommandEvent& event);
         void OnLoad(wxCommandEvent& event);

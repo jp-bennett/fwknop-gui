@@ -24,6 +24,8 @@ include_directories(${CMAKE_SOURCE_DIR})
 
 find_package(LibFko REQUIRED)
 find_package(CURL REQUIRED)
+find_package(LibQrencode REQUIRED)
+
 
 set(CODE_FILES
   ${CODE_FILES}
@@ -32,6 +34,9 @@ set(CODE_FILES
   fwknop_guiMain.cpp
   wizard.cpp
   general_config.cpp
+  rc_import.cpp
+  rc_export.cpp
+  qr_export.cpp
   )
 
 
@@ -41,7 +46,7 @@ add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
 
 SET_TARGET_PROPERTIES(fwknop-gui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES})
+target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES} ${LIBQRENCODE_LIBRARIES})
 if(IS_LINUX)
   install(FILES help.html DESTINATION share/fwknop-gui)
   install(TARGETS fwknop-gui DESTINATION bin)

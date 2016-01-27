@@ -48,7 +48,7 @@ wxString Config::validateConfig()
         return wxT("Invalid Base64 HMAC.");
     } else if (!(this->MESS_TYPE.CmpNoCase(wxT("Server Command")) == 0 || portStringValidate.Matches(this->PORTS))) { //If not a server command, make sure the port string is valid
         return wxT("Invalid Port string. Must look like tcp/22.");
-    } else if (!(this->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) ||  this->ACCESS_IP.CmpNoCase(wxT("Source IP")) || findIP.Matches(this->ACCESS_IP) )) { //if specifying ip, make sure is valid
+    } else if (!(this->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) == 0 ||  this->ACCESS_IP.CmpNoCase(wxT("Source IP")) == 0 || this->ACCESS_IP.CmpNoCase(wxT("Prompt IP")) == 0 || findIP.Matches(this->ACCESS_IP) )) { //if specifying ip, make sure is valid
         return wxT("Invalid IP to allow."); // Have to have a valid ip to allow, if using allow ip
     } else if (this->MESS_TYPE.CmpNoCase(wxT("Nat Access")) == 0 && !(findIP.Matches(this->NAT_IP) && (0 < wxAtoi(NAT_PORT) && wxAtoi(NAT_PORT) < 65536))) { //NAT_IP must be a valid ip, and NAT_PORT must be a valid port
         return wxT("Invalid NAT ip/port.");
@@ -113,8 +113,8 @@ void Config::loadConfig(wxString Nick, wxFileConfig *configFile)
     this->NAT_IP = configFile->Read(wxT("NAT_IP"));
     this->NAT_PORT = configFile->Read(wxT("NAT_PORT"));
     this->SERVER_CMD = configFile->Read(wxT("SERVER_CMD"));
-    this->DIGEST_TYPE = configFile->Read(wxT("DIGEST_TYPE"));
-    this->HMAC_TYPE = configFile->Read(wxT("HMAC_TYPE"));
+    this->DIGEST_TYPE = configFile->Read(wxT("DIGEST_TYPE"), wxT("SHA256"));
+    this->HMAC_TYPE = configFile->Read(wxT("HMAC_TYPE"), wxT("SHA256"));
 
 
 }
@@ -154,6 +154,7 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
     short hmac_type = FKO_HMAC_SHA256;
     char key_str[129] = {0}, hmac_str[129] = {0};
     char spa_msg[256] = {0};
+    char debug_buf[4096] = {0};
     char nat_access_str[25] = {0};
 
     memset(&opts, 0, sizeof(fwknop_options_t));
@@ -278,6 +279,8 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
 
     if (fko_get_spa_data(ctx, &opts.spa_data) != FKO_SUCCESS)
         return _("Could not retrieve SPA data.");
+
+    //dump_ctx_to_buffer(ctx, debug_buf, sizeof(debug_buf));
 
     this->SPA_STRING = wxString::FromUTF8(opts.spa_data);
     return _("Success");
