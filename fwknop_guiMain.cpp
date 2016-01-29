@@ -319,7 +319,8 @@ hServCmdBox->Add(ServCmdTxt,1, wxEXPAND);
 
 listbox = new wxListBox(this, ID_List, wxPoint(-1, -1), wxSize(200, -1));
 ourConfig->getAllConfigs(ourConfigList, configFile);
-listbox->InsertItems(*ourConfigList,0);
+if (!ourConfigList->IsEmpty())
+    listbox->InsertItems(*ourConfigList,0);
 
 wxButton *ok = new wxButton(this, ID_KnockButton, wxT("Send Knock"));
 
@@ -657,7 +658,8 @@ void fwknop_guiFrame::OnLocation(wxCommandEvent &event)
     configFile = new wxFileConfig (wxT(""), wxT(""), getRC.GetPath());
     ourConfig->getAllConfigs(ourConfigList, configFile);
     listbox->Clear();
-    listbox->InsertItems(*ourConfigList,0);
+    if (!ourConfigList->IsEmpty())
+        listbox->InsertItems(*ourConfigList,0);
     listbox->SetSelection(wxNOT_FOUND);
     ourConfig->defaultConfig();
     this->populate();
