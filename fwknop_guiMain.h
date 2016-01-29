@@ -74,6 +74,7 @@ class fwknop_guiFrame: public wxFrame
             idMenuSettings,
             idMenuNew,
             idMenuDelete,
+            idMenuLocation,
             idMenuWizard,
             idMenuImport,
             idMenuExport,
@@ -94,6 +95,7 @@ class fwknop_guiFrame: public wxFrame
         void OnQuit(wxCommandEvent& event);
         void OnNew(wxCommandEvent& event);
         void OnDelete(wxCommandEvent& event);
+        void OnLocation(wxCommandEvent& event);
         void OnAbout(wxCommandEvent& event);
         void OnHelpScreen(wxCommandEvent& event);
         void OnSettings(wxCommandEvent& event);

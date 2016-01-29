@@ -50,6 +50,7 @@ BEGIN_EVENT_TABLE(fwknop_guiFrame, wxFrame)
     EVT_CLOSE(fwknop_guiFrame::OnClose)
     EVT_MENU(idMenuQuit, fwknop_guiFrame::OnQuit)
     EVT_MENU(idMenuNew, fwknop_guiFrame::OnNew)
+    EVT_MENU(idMenuLocation, fwknop_guiFrame::OnLocation)
     EVT_MENU(idMenuDelete, fwknop_guiFrame::OnDelete)
     EVT_MENU(idMenuAbout, fwknop_guiFrame::OnAbout)
     EVT_MENU(idMenuHelpScreen, fwknop_guiFrame::OnHelpScreen)
@@ -77,6 +78,7 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
     fileMenu->Append(idMenuSettings, _("Settings"));
     fileMenu->Append(idMenuNew, _("&New Config"));
     fileMenu->Append(idMenuDelete, _("&Delete Config"));
+    fileMenu->Append(idMenuLocation, _("&Choose Config File"));
     fileMenu->Append(idMenuQuit, _("&Quit\tAlt-F4"), _("Quit the application"));
     mbar->Append(fileMenu, _("&File"));
 
@@ -135,6 +137,7 @@ initMessTypeEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_MessTyp
 initAllowIPEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_AllowIP);
 initCheckboxEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_Random);
 configFile = new wxFileConfig (wxT("fwknop-gui"));
+
 ourConfigList = new wxArrayString;
 ourConfig = new Config;
 
@@ -642,6 +645,24 @@ void fwknop_guiFrame::OnQR(wxCommandEvent &event)
         qr_export *qr_export_dialog = new qr_export(_(""), ourConfig);
         qr_export_dialog->Show(true);
     }
+}
+
+void fwknop_guiFrame::OnLocation(wxCommandEvent &event)
+{
+    wxFileDialog getRC(this, _("Saved Config File to Use"), _(""), _(""), wxFileSelectorDefaultWildcardStr, wxFD_SAVE);
+    if (getRC.ShowModal() == wxID_CANCEL) {
+        return;
+    }
+    free(configFile);
+    configFile = new wxFileConfig (wxT(""), wxT(""), getRC.GetPath());
+    ourConfig->getAllConfigs(ourConfigList, configFile);
+    listbox->Clear();
+    listbox->InsertItems(*ourConfigList,0);
+    listbox->SetSelection(wxNOT_FOUND);
+    ourConfig->defaultConfig();
+    this->populate();
+
+
 }
 
 void fwknop_guiFrame::OnDelete(wxCommandEvent &event)

@@ -23,7 +23,7 @@ rc_export::rc_export(const wxString & title, const Config *selectedConfig)
     if (selectedConfig->LEGACY)
         configBuf.Append(wxT("\nENCRYPTION_MODE     legacy"));
 
-    if (selectedConfig->SERVER_PORT.CmpNoCase("random") == 0) {
+    if (selectedConfig->SERVER_PORT.CmpNoCase(_("random")) == 0) {
         configBuf.Append(wxT("\nRAND_PORT           Y"));
     } else {
         configBuf.Append(wxT("\nSPA_SERVER_PORT     "));
@@ -53,16 +53,16 @@ rc_export::rc_export(const wxString & title, const Config *selectedConfig)
         configBuf.Append(selectedConfig->KEY);
     }
 
-    if (selectedConfig->MESS_TYPE.CmpNoCase("Server Command") == 0) { // fwknoprc seems not to have support for server commands
+    if (selectedConfig->MESS_TYPE.CmpNoCase(_("Server Command")) == 0) { // fwknoprc seems not to have support for server commands
 
-    } else if (selectedConfig->MESS_TYPE.CmpNoCase("Open Port") == 0) {
+    } else if (selectedConfig->MESS_TYPE.CmpNoCase(_("Open Port")) == 0) {
         configBuf.Append(wxT("\nACCESS              "));
         configBuf.Append(selectedConfig->PORTS);
         if(!selectedConfig->SERVER_TIMEOUT.IsEmpty()) {
             configBuf.Append(wxT("\nCLIENT_TIMEOUT      "));
             configBuf.Append(selectedConfig->SERVER_TIMEOUT);
         }
-    } else if (selectedConfig->MESS_TYPE.CmpNoCase("Nat Access") == 0) {
+    } else if (selectedConfig->MESS_TYPE.CmpNoCase(_("Nat Access")) == 0) {
         configBuf.Append(wxT("\nACCESS              "));
         configBuf.Append(selectedConfig->PORTS);
         configBuf.Append(wxT("\nNAT_ACCESS          "));
@@ -74,7 +74,7 @@ rc_export::rc_export(const wxString & title, const Config *selectedConfig)
             configBuf.Append(wxT("\nCLIENT_TIMEOUT      "));
             configBuf.Append(selectedConfig->SERVER_TIMEOUT);
         }
-    }  else if (selectedConfig->MESS_TYPE.CmpNoCase("Local Nat Access") == 0) {
+    }  else if (selectedConfig->MESS_TYPE.CmpNoCase(_("Local Nat Access")) == 0) {
         configBuf.Append(wxT("\nACCESS              "));
         configBuf.Append(selectedConfig->PORTS);
         configBuf.Append(wxT("\nNAT_LOCAL           Y"));

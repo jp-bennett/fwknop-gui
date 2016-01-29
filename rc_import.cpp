@@ -166,8 +166,8 @@ void rc_import::OnOK(wxCommandEvent &event)
         else if (rc_Pair[0].CmpNoCase(wxT("NAT_PORT")) == 0)
             ourConfig->NAT_PORT = rc_Pair[1];
         else if (rc_Pair[0].CmpNoCase(wxT("NAT_ACCESS")) == 0) {
-            ourConfig->NAT_IP = rc_Pair[1].BeforeFirst(wxUniChar(','));
-            ourConfig->NAT_PORT = rc_Pair[1].AfterLast(wxUniChar(','));
+            ourConfig->NAT_IP = rc_Pair[1].BeforeFirst(',');
+            ourConfig->NAT_PORT = rc_Pair[1].AfterLast(',');
         }
 
 
