@@ -56,6 +56,7 @@ endif()
 if(IS_WIN32)
   target_link_libraries(fwknop-gui wsock32 ws2_32 ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES})
   set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
+  include_directories(${LIBQRENCODE_INCLUDE_DIR})
 endif()
 if(IS_APPLE)
     INSTALL(CODE "
