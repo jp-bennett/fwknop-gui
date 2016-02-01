@@ -26,7 +26,6 @@ find_package(LibFko REQUIRED)
 find_package(CURL REQUIRED)
 find_package(LibQrencode REQUIRED)
 
-
 set(CODE_FILES
   ${CODE_FILES}
   configs.cpp
@@ -54,6 +53,7 @@ if(IS_LINUX)
   install(FILES fwknop-gui.png DESTINATION share/pixmaps)
 endif()
 if(IS_WIN32)
+  include_directories( ${LIBQRENCODE_INCLUDE_DIR} )
   target_link_libraries(fwknop-gui wsock32 ws2_32 ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES})
   set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
   include_directories(${LIBQRENCODE_INCLUDE_DIR})
