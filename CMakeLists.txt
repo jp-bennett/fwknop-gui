@@ -62,6 +62,8 @@ if(IS_APPLE)
     INSTALL(CODE "
     set(BU_CHMOD_BUNDLE_ITEMS ON)
     include(BundleUtilities)
+    file(MAKE_DIRECTORY ${CMAKE_INSTALL_PREFIX}/fwknop-gui.app/Contents/SharedSupport)
+    file(INSTALL ${CMAKE_SOURCE_DIR}/help.html DESTINATION ${CMAKE_INSTALL_PREFIX}/fwknop-gui.app/Contents/SharedSupport/)
     fixup_bundle(${CMAKE_INSTALL_PREFIX}/fwknop-gui.app \"\" \"\")
 ")
 endif()
