@@ -178,7 +178,7 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
         if (curl_Res == CURLE_OK)
         {
             wxString result_tmp = wxString::FromUTF8(oss.str().c_str());
-            wxRegEx findIP( wxT("^(([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])$"));
+            wxRegEx findIP( wxT("(([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]{1}|[0-9]{2}|[0-1][0-9]{2}|2[0-4][0-9]|25[0-5])"));
             if (!findIP.Matches(result_tmp))
                 return _("Unable to resolve our IP!");
 
