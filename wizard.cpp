@@ -31,6 +31,7 @@ wizardDialog::wizardDialog(const wxString & title)
 
     ChkReqSrc = new wxCheckBox(panel, ID_SRC_CHK,
       wxT("Require Source Address"), wxPoint(15, 100));
+    ChkReqSrc->SetValue(true);
 
     tc = new wxTextCtrl(panel, -1, wxT(""),
       wxPoint(15, 135), wxSize(875, 225), wxTE_MULTILINE | wxTE_READONLY);
