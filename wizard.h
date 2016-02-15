@@ -15,6 +15,7 @@ private:
 
     wxTextCtrl *key_txt;
     wxCheckBox *ChkAllowCmd;
+    wxCheckBox *ChkReqSrc;
     wxString keyString;
     char generatedKey[MAX_B64_KEY_LEN+1];
     char generatedHMAC[MAX_B64_KEY_LEN+1];
@@ -27,7 +28,8 @@ private:
     ID_OKButton = 1100,
     ID_CopyButton,
     ID_KEY_TXT,
-    ID_CMD_CHK
+    ID_CMD_CHK,
+    ID_SRC_CHK
     };
 
   void OnUpdate(wxCommandEvent& event);

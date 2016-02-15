@@ -4,11 +4,12 @@ BEGIN_EVENT_TABLE(wizardDialog, wxDialog)
     EVT_BUTTON(ID_OKButton, wizardDialog::OnOK)
     EVT_BUTTON(ID_CopyButton, wizardDialog::OnCopy)
     EVT_CHECKBOX(ID_CMD_CHK, wizardDialog::OnUpdate)
+    EVT_CHECKBOX(ID_SRC_CHK, wizardDialog::OnUpdate)
     EVT_TEXT(ID_KEY_TXT, wizardDialog::OnUpdate)
 END_EVENT_TABLE()
 
 wizardDialog::wizardDialog(const wxString & title)
-       : wxDialog(NULL, -1, title, wxDefaultPosition, wxSize(900, 330))
+       : wxDialog(NULL, -1, title, wxDefaultPosition, wxSize(900, 360))
 {
 
     tmp_config = new Config;
@@ -19,7 +20,7 @@ wizardDialog::wizardDialog(const wxString & title)
     wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
 
-    wxStaticText *key_lbl = new wxStaticText(panel, -1, wxT("Enter text to use as key, or leave blank to generate."),
+    wxStaticText *key_lbl = new wxStaticText(panel, -1, wxT("Enter text to use as key, or leave blank to use the generated key."),
       wxPoint(15, 5));
 
     key_txt = new wxTextCtrl(panel, ID_KEY_TXT,
@@ -28,14 +29,17 @@ wizardDialog::wizardDialog(const wxString & title)
     ChkAllowCmd = new wxCheckBox(panel, ID_CMD_CHK,
       wxT("Allow Command Message"), wxPoint(15, 70));
 
+    ChkReqSrc = new wxCheckBox(panel, ID_SRC_CHK,
+      wxT("Require Source Address"), wxPoint(15, 100));
+
     tc = new wxTextCtrl(panel, -1, wxT(""),
-      wxPoint(15, 105), wxSize(875, 225), wxTE_MULTILINE | wxTE_READONLY);
+      wxPoint(15, 135), wxSize(875, 225), wxTE_MULTILINE | wxTE_READONLY);
 
     wxButton *okButton = new wxButton(this, ID_OKButton, wxT("Ok"),
       wxDefaultPosition, wxSize(70, 30));
 
-    wxButton *copyButton = new wxButton(this, ID_CopyButton, wxT("Copy"),
-      wxDefaultPosition, wxSize(70, 30));
+    wxButton *copyButton = new wxButton(this, ID_CopyButton, wxT("Copy to Clipboard"),
+      wxDefaultPosition, wxSize(170, 30));
 
     hbox->Add(okButton, 1);
     hbox->Add(copyButton, 1);
@@ -71,12 +75,15 @@ void wizardDialog::OnUpdate(wxCommandEvent &event)
     hmacString.Append(wxString::FromAscii(generatedHMAC));
     hmacString.Append(_("\n"));
     access_conf.Append(hmacString);
-    access_conf.Append(_("ENABLE_CMD_EXEC "));
-    if (ChkAllowCmd->GetValue())
-        access_conf.Append(_("Y"));
-    else
-        access_conf.Append(_("N"));
 
+    if (ChkAllowCmd->GetValue()) {
+        access_conf.Append(_("ENABLE_CMD_EXEC "));
+        access_conf.Append(_("Y\n"));
+    }
+    if (ChkReqSrc->GetValue()) {
+        access_conf.Append(_("REQUIRE_SOURCE_ADDRESS "));
+        access_conf.Append(_("Y\n"));
+    }
     tc->ChangeValue(access_conf);
 }
 
@@ -98,6 +105,6 @@ void wizardDialog::OnOK(wxCommandEvent &event)
     tmp_config->KEY_BASE64 = false;
     }
     tmp_config->HMAC = wxString::FromAscii(generatedHMAC);
-    Destroy();
+    EndModal( wxID_OK);
 }
 

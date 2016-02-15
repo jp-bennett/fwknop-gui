@@ -608,15 +608,16 @@ void fwknop_guiFrame::OnWizard(wxCommandEvent &event)
 {
     wizardDialog *wizard = new wizardDialog(_("Access.conf wizard"));
     wizard->Show(true);
-
-    listbox->SetSelection(wxNOT_FOUND);
-    ourConfig->defaultConfig();
-    ourConfig->KEY = wizard->tmp_config->KEY;
-    ourConfig->KEY_BASE64 = wizard->tmp_config->KEY_BASE64;
-    ourConfig->HMAC = wizard->tmp_config->HMAC;
-    ourConfig->HMAC_BASE64 = true;
-    this->populate();
-    wxMessageBox(_("Generated keys imported into a blank config"));
+    if (wizard->GetReturnCode() == wxID_OK) {
+        listbox->SetSelection(wxNOT_FOUND);
+        ourConfig->defaultConfig();
+        ourConfig->KEY = wizard->tmp_config->KEY;
+        ourConfig->KEY_BASE64 = wizard->tmp_config->KEY_BASE64;
+        ourConfig->HMAC = wizard->tmp_config->HMAC;
+        ourConfig->HMAC_BASE64 = true;
+        this->populate();
+        wxMessageBox(_("Generated keys imported into a blank config"));
+    }
 
 }
 
