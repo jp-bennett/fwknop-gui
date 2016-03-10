@@ -9,10 +9,13 @@
 #include <wx/regex.h>
 #include <wx/timer.h>
 #include <wx/busyinfo.h>
+#include <wx/wx.h>
+#include <wx/protocol/http.h>
 #include <curl/curl.h>
 #include <curl/easy.h>
 #include <sstream>
 #include <fko.h>
+
 
 
 class Config
@@ -37,6 +40,7 @@ class Config
         wxString SPA_STRING;
         wxString DIGEST_TYPE;
         wxString HMAC_TYPE;
+        bool KEEP_OPEN;
 
 
         void getAllConfigs(wxArrayString * configs, wxFileConfig *configFile);
@@ -45,6 +49,7 @@ class Config
         void loadConfig(wxString Nick, wxFileConfig *configFile);
         void defaultConfig();
         wxString gen_SPA(wxString ip_resolver_url); // returns status.
+        wxString send_SPA(wxIPV4address *serverAddr);
 
     private:
         typedef struct fwknop_options

@@ -10,6 +10,7 @@ private:
 
   wxTextCtrl *url_txt;
   wxFileConfig *privateConfigFile;
+  wxCheckBox *countdownCheck;
 
   enum
     {

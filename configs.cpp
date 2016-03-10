@@ -89,6 +89,7 @@ configFile->SetPath(wxT("/") + this->NICK_NAME);
     configFile->Write(wxT("SERVER_CMD"), this->SERVER_CMD);
     configFile->Write(wxT("DIGEST_TYPE"), this->DIGEST_TYPE);
     configFile->Write(wxT("HMAC_TYPE"), this->HMAC_TYPE);
+    configFile->Write(wxT("KEEP_OPEN"), this->KEEP_OPEN);
     configFile->Flush();
 
 }
@@ -115,7 +116,7 @@ void Config::loadConfig(wxString Nick, wxFileConfig *configFile)
     this->SERVER_CMD = configFile->Read(wxT("SERVER_CMD"));
     this->DIGEST_TYPE = configFile->Read(wxT("DIGEST_TYPE"), wxT("SHA256"));
     this->HMAC_TYPE = configFile->Read(wxT("HMAC_TYPE"), wxT("SHA256"));
-
+    configFile->Read(wxT("KEEP_OPEN"), &this->KEEP_OPEN, false);
 
 }
 
@@ -140,6 +141,7 @@ void Config::defaultConfig()
     this->SERVER_CMD = wxEmptyString;
     this->DIGEST_TYPE = wxT("SHA256");
     this->HMAC_TYPE = wxT("SHA256");
+    this->KEEP_OPEN = false;
 }
 
 wxString Config::gen_SPA(wxString ip_resolver_url)
@@ -284,6 +286,75 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
 
     this->SPA_STRING = wxString::FromUTF8(opts.spa_data);
     return _("Success");
+}
+
+wxString Config::send_SPA(wxIPV4address *serverAddr)
+{
+
+
+
+
+    if (this->PROTOCOL.CmpNoCase(wxT("UDP")) == 0) {
+
+        wxIPV4address ourAddr;
+        ourAddr.AnyAddress();
+        ourAddr.Service(0);
+
+        if (serverAddr->Service(this->SERVER_PORT))
+        {
+            wxDatagramSocket *m_socket;
+            m_socket = new wxDatagramSocket(ourAddr, wxSOCKET_NOWAIT);
+            m_socket->SendTo(*serverAddr, this->SPA_STRING.mb_str(), this->SPA_STRING.Len());
+            m_socket->WaitForWrite();
+            if (m_socket->Error()) {
+                m_socket->Destroy();
+                return(_("Could not send knock: Error sending."));
+            } else {
+                m_socket->Destroy();
+                return(_("Knock sent successfully."));
+            }
+
+
+        } else
+            return(_("Could not send knock: could not set server port."));
+
+    } else if (this->PROTOCOL.CmpNoCase(wxT("TCP")) == 0) {
+        wxIPV4address ourAddr;
+        ourAddr.AnyAddress();
+        ourAddr.Service(0);
+
+        if (serverAddr->Service(this->SERVER_PORT))
+        {
+            wxSocketClient *tcp_socket = new wxSocketClient;
+            tcp_socket->Connect(*serverAddr);
+            tcp_socket->WaitForWrite();
+            tcp_socket->Write(this->SPA_STRING.mb_str(), this->SPA_STRING.Len());
+            tcp_socket->WaitForWrite();
+            if (tcp_socket->Error()) {
+                tcp_socket->Destroy();
+                return(_("Could not send knock: Error sending."));
+            } else {
+                tcp_socket->Destroy();
+                return(_("Knock sent successfully."));
+            }
+
+
+        } else
+        return(_("Could not send knock: could not set server address."));
+
+    } else if (this->PROTOCOL.CmpNoCase(wxT("HTTP")) == 0) {
+        wxHTTP *http_serv = new wxHTTP;
+        http_serv->Connect(this->SERVER_IP, wxAtoi(this->SERVER_PORT));
+        wxInputStream *tmp_stream;
+        tmp_stream = http_serv->GetInputStream(this->SPA_STRING);
+        delete tmp_stream;
+        http_serv->Destroy();
+        return(_("Knock sent successfully."));
+
+    } else
+        return(_("Not implemented yet"));
+    return(_("Unknown error"));
+
 }
 
 static size_t data_write(void* buf, size_t size, size_t nmemb, void* userp)

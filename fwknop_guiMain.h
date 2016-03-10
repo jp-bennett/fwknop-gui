@@ -20,6 +20,7 @@
 #include "rc_export.h"
 #include "rc_import.h"
 #include "qr_export.h"
+#include "timer.h"
 class fwknop_guiFrame: public wxFrame
 {
     public:
@@ -34,6 +35,7 @@ class fwknop_guiFrame: public wxFrame
         wxChoice *MessTypeChoice;
         wxBoxSizer *hAccessPortsBox;
         wxBoxSizer *hFwTimeBox;
+        wxBoxSizer *hKeepAliveBox;
         wxBoxSizer *hInternalIPBox;
         wxBoxSizer *hInternalPortBox;
         wxBoxSizer *hServCmdBox;
@@ -54,6 +56,7 @@ class fwknop_guiFrame: public wxFrame
         wxTextCtrl *IPToAllowTxt;
         wxTextCtrl *AccessPortsTxt;
         wxTextCtrl *FwTimeTxt;
+        wxCheckBox *KeepOpenChk;
         wxTextCtrl *InternalIPTxt;
         wxTextCtrl *InternalPortTxt;
         wxTextCtrl *ServCmdTxt;

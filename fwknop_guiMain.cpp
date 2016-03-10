@@ -127,6 +127,7 @@ hIPToAllowBox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *hMessTypeBox = new wxBoxSizer(wxHORIZONTAL);
 hAccessPortsBox = new wxBoxSizer(wxHORIZONTAL);
 hFwTimeBox = new wxBoxSizer(wxHORIZONTAL);
+hKeepAliveBox = new wxBoxSizer(wxHORIZONTAL);
 hInternalIPBox = new wxBoxSizer(wxHORIZONTAL);
 hInternalPortBox = new wxBoxSizer(wxHORIZONTAL);
 hServCmdBox = new wxBoxSizer(wxHORIZONTAL);
@@ -294,6 +295,10 @@ FwTimeTxt = new wxTextCtrl(vConfigScroll, wxID_ANY, wxT("60"));
 hFwTimeBox->Add(FwTimeLbl,0,wxALIGN_BOTTOM);
 hFwTimeBox->Add(FwTimeTxt,1, wxEXPAND);
 
+KeepOpenChk = new wxCheckBox(vConfigScroll, wxID_ANY,wxT("Keep port open by automatically resending SPA packets"));
+
+hKeepAliveBox->Add(KeepOpenChk);
+
 
 wxStaticText *InternalIPLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Internal IP: "));
 InternalIPTxt = new wxTextCtrl(vConfigScroll, wxID_ANY);
@@ -349,6 +354,7 @@ vConfigBox->Add(hIPToAllowBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hMessTypeBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hAccessPortsBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hFwTimeBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
+vConfigBox->Add(hKeepAliveBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hInternalIPBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hInternalPortBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hServCmdBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
@@ -398,6 +404,7 @@ void fwknop_guiFrame::OnSave(wxCommandEvent &event)
     }
     ourConfig->PORTS = AccessPortsTxt->GetLineText(0);
     ourConfig->SERVER_TIMEOUT = FwTimeTxt->GetLineText(0);
+    ourConfig->KEEP_OPEN = KeepOpenChk->IsChecked();
     ourConfig->NAT_IP = InternalIPTxt->GetLineText(0);
     ourConfig->NAT_PORT = InternalPortTxt->GetLineText(0);
     ourConfig->SERVER_CMD = ServCmdTxt->GetLineText(0);
@@ -448,6 +455,7 @@ void fwknop_guiFrame::OnChoice(wxCommandEvent &event)
         case 0:
             vConfigBox->Show(hAccessPortsBox);
             vConfigBox->Show(hFwTimeBox);
+            vConfigBox->Show(hKeepAliveBox);
             vConfigBox->Hide(hInternalIPBox);
             vConfigBox->Hide(hInternalPortBox);
             vConfigBox->Hide(hServCmdBox);
@@ -455,6 +463,7 @@ void fwknop_guiFrame::OnChoice(wxCommandEvent &event)
         case 1:
             vConfigBox->Show(hAccessPortsBox);
             vConfigBox->Show(hFwTimeBox);
+            vConfigBox->Show(hKeepAliveBox);
             vConfigBox->Show(hInternalIPBox);
             vConfigBox->Show(hInternalPortBox);
             vConfigBox->Hide(hServCmdBox);
@@ -462,6 +471,7 @@ void fwknop_guiFrame::OnChoice(wxCommandEvent &event)
         case 2:
             vConfigBox->Show(hAccessPortsBox);
             vConfigBox->Show(hFwTimeBox);
+            vConfigBox->Show(hKeepAliveBox);
             vConfigBox->Hide(hInternalIPBox);
             vConfigBox->Show(hInternalPortBox);
             vConfigBox->Hide(hServCmdBox);
@@ -470,6 +480,7 @@ void fwknop_guiFrame::OnChoice(wxCommandEvent &event)
             vConfigBox->Show(hServCmdBox);
             vConfigBox->Hide(hAccessPortsBox);
             vConfigBox->Hide(hFwTimeBox);
+            vConfigBox->Hide(hKeepAliveBox);
             vConfigBox->Hide(hInternalIPBox);
             vConfigBox->Hide(hInternalPortBox);
         break;
@@ -522,66 +533,23 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
 
     configFile->SetPath(wxT("/"));
     SPA_Result = ourConfig->gen_SPA(configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")));
-    if (SPA_Result.Cmp(wxT("Success")) != 0 ) {
+    if (SPA_Result.CmpNoCase(wxT("Success")) != 0 ) {
         wxMessageBox(SPA_Result);
         return;
     }
 
-    if (ourConfig->PROTOCOL.CmpNoCase(wxT("UDP")) == 0) {
-
-        wxIPV4address ourAddr;
-        ourAddr.AnyAddress();
-        ourAddr.Service(0);
-
-        if (serverAddr.Service(ourConfig->SERVER_PORT))
-        {
-            wxDatagramSocket *m_socket;
-            m_socket = new wxDatagramSocket(ourAddr, wxSOCKET_NOWAIT);
-            m_socket->SendTo(serverAddr, ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
-            m_socket->WaitForWrite();
-            if (m_socket->Error()) {
-                wxMessageBox(_("Could not send knock: Error sending."));
-            } else {
-                wxMessageBox(_("Knock sent successfully."));
-            }
-            m_socket->Destroy();
-
-        } else
-            wxMessageBox(_("Could not send knock: could not set server port."));
-
-    } else if (ourConfig->PROTOCOL.CmpNoCase(wxT("TCP")) == 0) {
-        wxIPV4address ourAddr;
-        ourAddr.AnyAddress();
-        ourAddr.Service(0);
-
-        if (serverAddr.Service(ourConfig->SERVER_PORT))
-        {
-            wxSocketClient *tcp_socket = new wxSocketClient;
-            tcp_socket->Connect(serverAddr);
-            tcp_socket->WaitForWrite();
-            tcp_socket->Write(ourConfig->SPA_STRING.mb_str(), ourConfig->SPA_STRING.Len());
-            tcp_socket->WaitForWrite();
-            if (tcp_socket->Error()) {
-                wxMessageBox(_("Could not send knock: Error sending."));
-            } else {
-                wxMessageBox(_("Knock sent successfully."));
-            }
-            tcp_socket->Destroy();
-
-        } else
-        wxMessageBox(_("Could not send knock: could not set server address."));
-
-    } else if (ourConfig->PROTOCOL.CmpNoCase(wxT("HTTP")) == 0) {
-        wxHTTP *http_serv = new wxHTTP;
-        http_serv->Connect(serverHost, wxAtoi(ourConfig->SERVER_PORT));
-        wxInputStream *tmp_stream;
-        tmp_stream = http_serv->GetInputStream(ourConfig->SPA_STRING);
-        delete tmp_stream;
-        http_serv->Destroy();
-
-    } else
-        wxMessageBox(_("Not implemented yet"));
-
+    SPA_Result = ourConfig->send_SPA(&serverAddr);
+    if (SPA_Result.CmpNoCase(wxT("Knock sent successfully.")) != 0 ) {
+        wxMessageBox(SPA_Result);
+        return;
+    } else if ((configFile->Read(wxT("show_timer"), _("true")).CmpNoCase(_("true")) == 0) || (ourConfig->KEEP_OPEN)){
+        timerDialog *ourTimer = new timerDialog(ourConfig->NICK_NAME, ourConfig, &serverAddr);
+        ourTimer->Show();
+        return;
+    } else {
+        wxMessageBox(SPA_Result);
+        return;
+    }
 }
 
 
@@ -783,6 +751,7 @@ void fwknop_guiFrame::populate()
 
     AccessPortsTxt->SetValue(ourConfig->PORTS);
     FwTimeTxt->SetValue(ourConfig->SERVER_TIMEOUT);
+    KeepOpenChk->SetValue(ourConfig->KEEP_OPEN);
     InternalIPTxt->SetValue(ourConfig->NAT_IP);
     InternalPortTxt->SetValue(ourConfig->NAT_PORT);
     ServCmdTxt->SetValue(ourConfig->SERVER_CMD);

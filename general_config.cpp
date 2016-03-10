@@ -25,6 +25,13 @@ gConfigDialog::gConfigDialog(wxFileConfig  *configFile)
 
     wxButton *defaultButton = new wxButton(panel, ID_DefButton, wxT("Set to Default"), wxPoint(15, 70));
 
+    countdownCheck = new wxCheckBox(panel, wxID_ANY, _("Show server timeout popup"), wxPoint(15, 110));
+    if (configFile->Read(wxT("show_timer"), _("true")).CmpNoCase(_("true")) == 0 ) {
+        countdownCheck->SetValue(true);
+    } else {
+        countdownCheck->SetValue(false);
+    }
+
     wxButton *okButton = new wxButton(this, ID_OKButton, wxT("Ok"),
       wxDefaultPosition, wxSize(70, 30));
 
@@ -49,6 +56,7 @@ gConfigDialog::gConfigDialog(wxFileConfig  *configFile)
 void gConfigDialog::OnDef(wxCommandEvent &event)
 {
     url_txt->ChangeValue(wxT("https://api.ipify.org"));
+    countdownCheck->SetValue(true);
 }
 
 void gConfigDialog::OnOK(wxCommandEvent &event)
@@ -59,6 +67,11 @@ void gConfigDialog::OnOK(wxCommandEvent &event)
         return;
     } else {
         privateConfigFile->Write(wxT("ip_resolver_url"), tmp_url);
+        if (countdownCheck->IsChecked()) {
+            privateConfigFile->Write(wxT("show_timer"), _("true"));
+        } else {
+            privateConfigFile->Write(wxT("show_timer"), _("false"));
+        }
         privateConfigFile->Flush();
         Destroy();
     }
