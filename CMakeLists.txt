@@ -36,6 +36,7 @@ set(CODE_FILES
   rc_import.cpp
   rc_export.cpp
   qr_export.cpp
+  timer.cpp
   )
 
 
