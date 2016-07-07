@@ -21,6 +21,7 @@
 #include "rc_import.h"
 #include "qr_export.h"
 #include "timer.h"
+#include "gpgme_wrapper.h"
 class fwknop_guiFrame: public wxFrame
 {
     public:
@@ -48,6 +49,7 @@ class fwknop_guiFrame: public wxFrame
         wxCheckBox *LegacyChk;
         wxCheckBox *RandomChk;
         wxTextCtrl *ServPortTxt;
+        wxCheckBox *GPGChk;
         wxTextCtrl *KeyTxt;
         wxCheckBox *KeyB64Chk;
         wxChoice *ProtoChoice;
@@ -65,6 +67,15 @@ class fwknop_guiFrame: public wxFrame
         wxCommandEvent *initMessTypeEvent;
         wxCommandEvent *initAllowIPEvent;
         wxCommandEvent *initCheckboxEvent;
+        gpgme_wrapper *ourGPG;
+        wxArrayString *GPGKeys;
+        wxArrayString *GPGSigKeys;
+        wxBoxSizer *hKeyBox;
+        wxBoxSizer *hKeyB64Box;
+        wxBoxSizer *hGPGChoiceBox;
+        wxChoice *GPGEncryptKey;
+        wxChoice *GPGSignatureKey;
+
 
 
 
@@ -82,6 +93,7 @@ class fwknop_guiFrame: public wxFrame
             idMenuImport,
             idMenuExport,
             idMenuQR,
+            idMenuGPGTools,
             ID_AllowIP,
             ID_MessType,
             ID_SaveButton,
@@ -90,6 +102,7 @@ class fwknop_guiFrame: public wxFrame
             ID_Random,
             ID_DigestType,
             ID_HmacType,
+            ID_USE_GPG,
             ID_html
         };
 

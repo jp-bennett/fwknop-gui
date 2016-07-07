@@ -62,6 +62,7 @@ BEGIN_EVENT_TABLE(fwknop_guiFrame, wxFrame)
     EVT_CHECKBOX(ID_Random, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_AllowIP, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_MessType, fwknop_guiFrame::OnChoice)
+    EVT_CHECKBOX(ID_USE_GPG, fwknop_guiFrame::OnChoice)
     EVT_BUTTON(ID_SaveButton, fwknop_guiFrame::OnSave)
     EVT_BUTTON(ID_KnockButton, fwknop_guiFrame::OnKnock)
     EVT_LISTBOX(ID_List, fwknop_guiFrame::OnLoad)
@@ -88,6 +89,19 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
     toolsMenu->Append(idMenuExport, _("&Export as fwknoprc file"));
     toolsMenu->Append(idMenuQR, _("&Export as QR code"));
     mbar->Append(toolsMenu, _("&Tools"));
+    wxMenu* GPGMenu = new wxMenu(_T(""));
+    mbar->Append(GPGMenu, _("&GPG"));
+    ourGPG = new gpgme_wrapper;
+    if (ourGPG->doInit()) {
+        GPGMenu->Append(idMenuGPGTools, _("&GPG Tools"), _("GPG tools and options"));
+    }
+    GPGKeys = new wxArrayString;
+    GPGSigKeys = new wxArrayString;
+    ourGPG->getAllKeys(GPGKeys);
+    ourGPG->getAllKeys(GPGSigKeys);
+    GPGSigKeys->Insert( _("None"), 0);
+
+
 
     wxMenu* helpMenu = new wxMenu(_T(""));
     helpMenu->Append(idMenuAbout, _("&About\tF1"), _("Show info about this application"));
@@ -118,8 +132,10 @@ wxBoxSizer *hLegacyBox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *hRandomBox = new wxBoxSizer(wxHORIZONTAL);
 hServPortBox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *hProtoBox = new wxBoxSizer(wxHORIZONTAL);
-wxBoxSizer *hKeyBox = new wxBoxSizer(wxHORIZONTAL);
-wxBoxSizer *hKeyB64Box = new wxBoxSizer(wxHORIZONTAL);
+wxBoxSizer *hUseGPGBox = new wxBoxSizer(wxHORIZONTAL);
+hGPGChoiceBox = new wxBoxSizer(wxHORIZONTAL);
+hKeyBox = new wxBoxSizer(wxHORIZONTAL);
+hKeyB64Box = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *hHmacKeyBox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *hHmacB64Box = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *hAllowIPBox = new wxBoxSizer(wxHORIZONTAL);
@@ -172,20 +188,38 @@ ServPortTxt = new wxTextCtrl(vConfigScroll, wxID_ANY,wxT("62201"));
 hServPortBox->Add(ServPortLbl,0,wxALIGN_BOTTOM);
 hServPortBox->Add(ServPortTxt,1, wxEXPAND);
 
-
+//Protocol choice
 wxStaticText *ProtoLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Protocol: "));
 
 wxArrayString Protos;
 Protos.Add(wxT("UDP"));
 Protos.Add(wxT("TCP"));
 Protos.Add(wxT("HTTP"));
-ProtoChoice = new wxChoice(vConfigScroll,wxID_ANY, wxDefaultPosition, wxDefaultSize,
-   Protos);
+ProtoChoice = new wxChoice(vConfigScroll,wxID_ANY, wxDefaultPosition, wxDefaultSize, Protos);
 
 hProtoBox->Add(ProtoLbl,0,wxALIGN_BOTTOM);
 hProtoBox->Add(ProtoChoice);
 ProtoChoice->SetSelection(0);
 
+
+//GPG Checkbox
+wxStaticText *GPGLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Use GPG: "));
+GPGChk = new wxCheckBox(vConfigScroll, ID_USE_GPG, wxT(""));
+
+hUseGPGBox->Add(GPGLbl);
+hUseGPGBox->Add(GPGChk);
+
+
+//GPG field
+wxStaticText *GPGChoiceLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("GPG Encryption Key: "));
+GPGEncryptKey = new wxChoice(vConfigScroll,wxID_ANY, wxDefaultPosition, wxDefaultSize, *GPGKeys);
+wxStaticText *GPGChoiceLbl2 = new wxStaticText(vConfigScroll,wxID_ANY, wxT("GPG Signature Key: "));
+GPGSignatureKey = new wxChoice(vConfigScroll,wxID_ANY, wxDefaultPosition, wxDefaultSize, *GPGSigKeys);
+hGPGChoiceBox->Add(GPGChoiceLbl);
+hGPGChoiceBox->Add(GPGEncryptKey);
+hGPGChoiceBox->Add(GPGChoiceLbl2);
+hGPGChoiceBox->Add(GPGSignatureKey);
+//Key field
 wxStaticText *KeyLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Rijndael Key: "));
 KeyTxt = new wxTextCtrl(vConfigScroll, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_PASSWORD);
 //KeyTxt->SetWindowStyleFlag(wxTE_PASSWORD);
@@ -343,6 +377,8 @@ vConfigBox->Add(hLegacyBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hRandomBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hServPortBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hProtoBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
+vConfigBox->Add(hUseGPGBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
+vConfigBox->Add(hGPGChoiceBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hKeyBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hKeyB64Box,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hDigestTypeBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
@@ -388,8 +424,15 @@ void fwknop_guiFrame::OnSave(wxCommandEvent &event)
         ourConfig->SERVER_PORT = ServPortTxt->GetLineText(0);
     }
     ourConfig->PROTOCOL = ProtoChoice->GetString(ProtoChoice->GetSelection());   //Change this for i18n
-    ourConfig->KEY = KeyTxt->GetLineText(0);
-    ourConfig->KEY_BASE64 = KeyB64Chk->GetValue();
+    if (GPGChk->IsChecked()) {
+        ourConfig->USE_GPG_CRYPT = true;
+        ourConfig->GPG_CRYPT_ID = GPGEncryptKey->GetString(GPGEncryptKey->GetSelection());
+        ourConfig->GPG_SIG_ID = GPGSignatureKey->GetString(GPGSignatureKey->GetSelection());
+    } else {
+        ourConfig->USE_GPG_CRYPT = false;
+        ourConfig->KEY = KeyTxt->GetLineText(0);
+        ourConfig->KEY_BASE64 = KeyB64Chk->GetValue();
+    }
     ourConfig->HMAC = HmacKeyTxt->GetLineText(0);
     ourConfig->HMAC_BASE64 = HmacKeyB64Chk->GetValue();
     ourConfig->MESS_TYPE = MessTypeChoice->GetString(MessTypeChoice->GetSelection()); //Change this for i18n
@@ -428,27 +471,29 @@ void fwknop_guiFrame::OnSave(wxCommandEvent &event)
 
 void fwknop_guiFrame::OnChoice(wxCommandEvent &event)
 {
-    switch (event.GetId())
-    {
-    case ID_Random:
+
         if (RandomChk->GetValue()) {
             vConfigBox->Hide(hServPortBox);
         } else {
             vConfigBox->Show(hServPortBox);
         }
 
-    break;
+        if (GPGChk->GetValue()) {
+            vConfigBox->Hide(hKeyBox);
+            vConfigBox->Hide(hKeyB64Box);
+            vConfigBox->Show(hGPGChoiceBox);
+        } else {
+            vConfigBox->Show(hKeyBox);
+            vConfigBox->Show(hKeyB64Box);
+            vConfigBox->Hide(hGPGChoiceBox);
+        }
 
-    case ID_AllowIP:
         if (AllowIPChoice->GetSelection() == 2)
         {
             vConfigBox->Show(hIPToAllowBox);
         } else {
             vConfigBox->Hide(hIPToAllowBox);
         }
-    break;
-
-    case ID_MessType:
 
         switch (MessTypeChoice->GetSelection())
         {
@@ -484,9 +529,7 @@ void fwknop_guiFrame::OnChoice(wxCommandEvent &event)
             vConfigBox->Hide(hInternalIPBox);
             vConfigBox->Hide(hInternalPortBox);
         break;
-    }
-    break;
-    }
+        }
 hbox->Layout();
 }
 
@@ -532,7 +575,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     ourConfig->SERVER_IP = serverAddr.IPAddress();
 
     configFile->SetPath(wxT("/"));
-    SPA_Result = ourConfig->gen_SPA(configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")));
+    SPA_Result = ourConfig->gen_SPA(configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")), ourGPG);
     if (SPA_Result.CmpNoCase(wxT("Success")) != 0 ) {
         wxMessageBox(SPA_Result);
         return;
@@ -677,7 +720,7 @@ void fwknop_guiFrame::OnAbout(wxCommandEvent &event)
     aboutInfo.SetName(_("Fwknop-gui"));
     aboutInfo.SetVersion(_("Version 1.0"));
     aboutInfo.SetDescription(_("Fwknop-gui is a cross platform graphical fwknop client."));
-    aboutInfo.SetWebSite(_("https://github.com/oneru/fwknop-gui"));
+    aboutInfo.SetWebSite(_("https://github.com/jp-bennett/fwknop-gui"));
     aboutInfo.AddDeveloper(_("Jonathan Bennett"));
     wxAboutBox(aboutInfo);
 }
@@ -712,7 +755,7 @@ void fwknop_guiFrame::populate()
     ServAddrTxt->ChangeValue(ourConfig->SERVER_IP);
     LegacyChk->SetValue(ourConfig->LEGACY);
     if (ourConfig->SERVER_PORT.CmpNoCase(wxT("Random")) == 0) {
-    RandomChk->SetValue(true);
+        RandomChk->SetValue(true);
     } else {
         RandomChk->SetValue(false);
         ServPortTxt->SetValue(ourConfig->SERVER_PORT);
@@ -724,8 +767,14 @@ void fwknop_guiFrame::populate()
     else if (ourConfig->PROTOCOL.CmpNoCase(wxT("HTTP")) == 0)
         ProtoChoice->SetSelection(2);
 
-    KeyTxt->SetValue(ourConfig->KEY);
-    KeyB64Chk->SetValue(ourConfig->KEY_BASE64);
+    GPGChk->SetValue(ourConfig->USE_GPG_CRYPT);
+    if (!ourConfig->USE_GPG_CRYPT) {
+        KeyTxt->SetValue(ourConfig->KEY);
+        KeyB64Chk->SetValue(ourConfig->KEY_BASE64);
+    } else {
+        GPGEncryptKey->SetSelection(GPGEncryptKey->FindString(ourConfig->GPG_CRYPT_ID));
+        GPGSignatureKey->SetSelection(GPGSignatureKey->FindString(ourConfig->GPG_SIG_ID));
+    }
     HmacKeyTxt->SetValue(ourConfig->HMAC);
     HmacKeyB64Chk->SetValue(ourConfig->HMAC_BASE64);
 
@@ -779,8 +828,8 @@ void fwknop_guiFrame::populate()
         HmacTypeChoice->SetSelection(4);
 
     OnChoice(*initMessTypeEvent);
-    OnChoice(*initAllowIPEvent);
-    OnChoice(*initCheckboxEvent);
+//    OnChoice(*initAllowIPEvent);
+//    OnChoice(*initCheckboxEvent);
 
 }
 

@@ -64,7 +64,7 @@ wxString Config::validateConfig()
                 || this->HMAC_TYPE.CmpNoCase(wxT("SHA384")) == 0
                 || this->HMAC_TYPE.CmpNoCase(wxT("SHA512")) == 0)) {
         return wxT("Invalid HMAC digest type.");
-    } else {
+    } else { //Could check for valid looking gpg keys if enabled
         return wxT("valid");
     }
 }
@@ -90,6 +90,9 @@ configFile->SetPath(wxT("/") + this->NICK_NAME);
     configFile->Write(wxT("DIGEST_TYPE"), this->DIGEST_TYPE);
     configFile->Write(wxT("HMAC_TYPE"), this->HMAC_TYPE);
     configFile->Write(wxT("KEEP_OPEN"), this->KEEP_OPEN);
+    configFile->Write(wxT("USE_GPG_CRYPT"), this->USE_GPG_CRYPT);
+    configFile->Write(wxT("GPG_CRYPT_ID"), this->GPG_CRYPT_ID);
+    configFile->Write(wxT("GPG_SIG_ID"), this->GPG_SIG_ID);
     configFile->Flush();
 
 }
@@ -118,6 +121,9 @@ void Config::loadConfig(wxString Nick, wxFileConfig *configFile)
     this->HMAC_TYPE = configFile->Read(wxT("HMAC_TYPE"), wxT("SHA256"));
     configFile->Read(wxT("KEEP_OPEN"), &this->KEEP_OPEN, false);
 
+    configFile->Read(wxT("USE_GPG_CRYPT"), &this->USE_GPG_CRYPT, false);
+    this->GPG_CRYPT_ID = configFile->Read(wxT("GPG_CRYPT_ID"), wxEmptyString);
+    this->GPG_SIG_ID = configFile->Read(wxT("GPG_SIG_ID"), wxEmptyString);
 }
 
 void Config::defaultConfig()
@@ -142,9 +148,12 @@ void Config::defaultConfig()
     this->DIGEST_TYPE = wxT("SHA256");
     this->HMAC_TYPE = wxT("SHA256");
     this->KEEP_OPEN = false;
+    this->USE_GPG_CRYPT = false;
+    this->GPG_CRYPT_ID = wxEmptyString;
+    this->GPG_SIG_ID = wxEmptyString;
 }
 
-wxString Config::gen_SPA(wxString ip_resolver_url)
+wxString Config::gen_SPA(wxString ip_resolver_url, gpgme_wrapper * ourGPG)
 {
     CURLcode curl_Res;
     fko_ctx_t ctx;
@@ -156,8 +165,13 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
     short hmac_type = FKO_HMAC_SHA256;
     char key_str[129] = {0}, hmac_str[129] = {0};
     char spa_msg[256] = {0};
-    char debug_buf[4096] = {0};
+    char spa_buf[4096] = {0};
+    char * spa_buf_ptr;
+    char crypt_buf[4096] = {0};
     char nat_access_str[25] = {0};
+    char * hmac_buf;
+    char * spa_digest_ptr;
+
 
     memset(&opts, 0, sizeof(fwknop_options_t));
 
@@ -275,24 +289,34 @@ wxString Config::gen_SPA(wxString ip_resolver_url)
         digest_type = FKO_DIGEST_SHA512;
     if (fko_set_spa_digest_type(ctx, digest_type) != FKO_SUCCESS)
         return _("Could not set SPA digest type.");
-
     if (fko_spa_data_final(ctx, key_str, key_len, hmac_str, hmac_str_len) != FKO_SUCCESS)
         return _("Could not generate SPA data.");
-
     if (fko_get_spa_data(ctx, &opts.spa_data) != FKO_SUCCESS)
         return _("Could not retrieve SPA data.");
+    if (!USE_GPG_CRYPT) {
+        if (fko_get_spa_data(ctx, &opts.spa_data) != FKO_SUCCESS)
+            return _("Could not retrieve SPA data.");
+        this->SPA_STRING = wxString::FromUTF8(opts.spa_data);
+    } else {
+        fko_get_encoded_data(ctx, &spa_buf_ptr);
+        fko_get_spa_digest(ctx, &spa_digest_ptr);
+        sprintf(spa_buf,"%s:%s", spa_buf_ptr, spa_digest_ptr);
+        ourGPG->encryptAndSign(GPG_CRYPT_ID, GPG_SIG_ID, spa_buf, crypt_buf);
+        fko_set_spa_data(ctx, crypt_buf);
+        fko_set_spa_hmac(ctx, hmac_str, hmac_str_len);
+        fko_get_spa_hmac(ctx, &hmac_buf);
+        strcat(crypt_buf, hmac_buf);
+        this->SPA_STRING = wxString::FromUTF8(crypt_buf + 2);
 
-    //dump_ctx_to_buffer(ctx, debug_buf, sizeof(debug_buf));
+    }
 
-    this->SPA_STRING = wxString::FromUTF8(opts.spa_data);
+
     return _("Success");
 }
 
 wxString Config::send_SPA(wxIPV4address *serverAddr)
 {
-
-
-
+//wxGetTextFromUser(wxEmptyString, wxEmptyString, this->SPA_STRING);//Make this part of debug
 
     if (this->PROTOCOL.CmpNoCase(wxT("UDP")) == 0) {
 

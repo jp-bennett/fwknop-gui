@@ -22,6 +22,7 @@ IMPLEMENT_APP(fwknop_guiApp);
 
 bool fwknop_guiApp::OnInit()
 {
+
     fwknop_guiFrame* frame = new fwknop_guiFrame(0L, _("Fwknop-gui"));
     frame->Show();
 

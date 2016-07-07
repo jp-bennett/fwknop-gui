@@ -28,6 +28,11 @@
 #include <curl/easy.h>
 #include <sstream>
 #include <wx/choicdlg.h>
+#include <wx/dynlib.h>
+
+
+#include <gpgme.h>
+
 
 
 
@@ -35,7 +40,6 @@ class fwknop_guiApp : public wxApp
 {
     public:
         virtual bool OnInit();
-
 
       //  wxDECLARE_EVENT_TABLE();
 };

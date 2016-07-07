@@ -17,7 +17,7 @@ timerDialog::timerDialog(const wxString & title, Config *selectedConfig, wxIPV4a
     main_timer->Start();
     second_timer = new wxTimer(this, ID_SECOND_TIMER);
     second_timer->Start(1000);
-    timerText = new wxStaticText(this,wxID_ANY,"");
+    timerText = new wxStaticText(this,wxID_ANY,wxEmptyString);
     font->SetPointSize(50);
 	timerText->SetFont(*font);
     timerText->SetLabel(ourConfig->SERVER_TIMEOUT);
@@ -43,8 +43,8 @@ void timerDialog::tickTock(wxTimerEvent &event)
         EndModal( wxID_OK);
     }
     if (time_left - (main_timer->Time()/1000) < 11  && ourConfig->KEEP_OPEN) {
-        ourConfig->gen_SPA(_(""));
-        if (ourConfig->gen_SPA(_("")).CmpNoCase(_("Success")) == 0) {
+        ourConfig->gen_SPA(_(""), nullptr);
+        if (ourConfig->gen_SPA(_(""), nullptr).CmpNoCase(_("Success")) == 0) {
             if(ourConfig->send_SPA(ourAddr).CmpNoCase(_("Knock sent successfully.")) == 0) {
                 main_timer->Start();
             }

@@ -15,6 +15,7 @@
 #include <curl/easy.h>
 #include <sstream>
 #include <fko.h>
+#include "gpgme_wrapper.h"
 
 
 
@@ -41,6 +42,9 @@ class Config
         wxString DIGEST_TYPE;
         wxString HMAC_TYPE;
         bool KEEP_OPEN;
+        bool USE_GPG_CRYPT;
+        wxString GPG_CRYPT_ID;
+        wxString GPG_SIG_ID;
 
 
         void getAllConfigs(wxArrayString * configs, wxFileConfig *configFile);
@@ -48,7 +52,7 @@ class Config
         void saveConfig(wxFileConfig *configFile);
         void loadConfig(wxString Nick, wxFileConfig *configFile);
         void defaultConfig();
-        wxString gen_SPA(wxString ip_resolver_url); // returns status.
+        wxString gen_SPA(wxString ip_resolver_url, gpgme_wrapper * ourGPG); // returns status.
         wxString send_SPA(wxIPV4address *serverAddr);
 
     private:
