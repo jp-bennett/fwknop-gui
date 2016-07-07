@@ -17,7 +17,7 @@ if (IS_WIN32)
   set(CODE_FILES win32/minimal.rc)
 endif()
 
-find_package(wxWidgets 2.8.10 REQUIRED xml html adv qa richtext net core base)
+find_package(wxWidgets 3.0.0 COMPONENTS xml html adv qa richtext net core base REQUIRED)
 
 include(${wxWidgets_USE_FILE})
 include_directories(${CMAKE_SOURCE_DIR})
@@ -37,6 +37,7 @@ set(CODE_FILES
   rc_export.cpp
   qr_export.cpp
   timer.cpp
+  gpgme_wrapper.cpp
   )
 
 

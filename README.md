@@ -4,6 +4,9 @@ It is based on the interface of Fwknop2 on Android.
 Binary downloads for Windows and Mac are hosted at http://incomsystems.biz/fwknop-gui
 
 Building from source is generally done by creating a build folder in the source directory, and running "cmake .." in that build folder. Then run make and sudo make install.
+I have run into an issue in Fedora where cmake will try to use wxWidgets 2.8.12 instead of a 3.0 version.  The solution seems to be to run
+cmake ../ -DwxWidgets_CONFIG_EXECUTABLE='/usr/bin/wx-config-3.0'
+
 
 To build on Windows, use the msys2 project from http://msys2.github.io/
 Once installed, don't launch the msys2 shell. Instead, use the "MinGW-w64 Win32 Shell" Start by running "update-core", installing those updates, and then closing that shell and reopening it.
