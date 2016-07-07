@@ -1,3 +1,4 @@
+include(FeatureSummary)
 cmake_minimum_required(VERSION 2.8)
 project(fwknop-gui CXX C)
 set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake/Modules/")
@@ -25,6 +26,7 @@ include_directories(${CMAKE_SOURCE_DIR})
 find_package(LibFko REQUIRED)
 find_package(CURL REQUIRED)
 find_package(LibQrencode REQUIRED)
+find_package(Gpgme REQUIRED)
 
 set(CODE_FILES
   ${CODE_FILES}
