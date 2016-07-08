@@ -203,13 +203,31 @@ wxString Config::gen_SPA(wxString ip_resolver_url, gpgme_wrapper * ourGPG)
             return _("Libcurl returned the error: ") + wxString::FromUTF8(curl_easy_strerror(curl_Res));
 
     } //end resolve ip
+    if (fko_new(&ctx) != FKO_SUCCESS)
+        return _("Could not get new FKO context");
 
-    if (this->KEY_BASE64)
-    {
-        key_len = fko_base64_decode(this->KEY.mb_str(), (unsigned char *)key_str);
+    if (USE_GPG_CRYPT) {
+        fko_set_spa_encryption_type(ctx, FKO_ENCRYPTION_GPG);
+        fko_set_gpg_exe(ctx, ourGPG->gpgEngine.mb_str());
+        fko_set_gpg_home_dir(ctx, ourGPG->gpgHomeFolder.mb_str());
+
+
+        fko_set_gpg_recipient(ctx, GPG_CRYPT_ID.mb_str());
+        if (GPG_SIG_ID.CmpNoCase(_("None")) != 0)
+        fko_set_gpg_signer(ctx, GPG_SIG_ID.mb_str());
+
+
+
+        fko_set_spa_encryption_mode(ctx, FKO_ENC_MODE_ASYMMETRIC);
+
     } else {
-        strncpy(key_str, (const char*)this->KEY.mb_str(wxConvUTF8), 128);
-        key_len = (int)strlen(key_str);
+        if (this->KEY_BASE64)
+        {
+            key_len = fko_base64_decode(this->KEY.mb_str(), (unsigned char *)key_str);
+        } else {
+            strncpy(key_str, (const char*)this->KEY.mb_str(wxConvUTF8), 128);
+            key_len = (int)strlen(key_str);
+        }
     }
 
     if (this->HMAC_BASE64)
@@ -220,8 +238,7 @@ wxString Config::gen_SPA(wxString ip_resolver_url, gpgme_wrapper * ourGPG)
         hmac_str_len = (int)strlen(hmac_str);
     }
 
-    if (fko_new(&ctx) != FKO_SUCCESS)
-        return _("Could not get new FKO context");
+
 
     if (MESS_TYPE.CmpNoCase(wxT("Server Command")) == 0)
     {
@@ -291,13 +308,14 @@ wxString Config::gen_SPA(wxString ip_resolver_url, gpgme_wrapper * ourGPG)
         return _("Could not set SPA digest type.");
     if (fko_spa_data_final(ctx, key_str, key_len, hmac_str, hmac_str_len) != FKO_SUCCESS)
         return _("Could not generate SPA data.");
+
     if (fko_get_spa_data(ctx, &opts.spa_data) != FKO_SUCCESS)
         return _("Could not retrieve SPA data.");
-    if (!USE_GPG_CRYPT) {
-        if (fko_get_spa_data(ctx, &opts.spa_data) != FKO_SUCCESS)
-            return _("Could not retrieve SPA data.");
+   // if (!USE_GPG_CRYPT) {
+       // if (fko_get_spa_data(ctx, &opts.spa_data) != FKO_SUCCESS)
+          //  return _("Could not retrieve SPA data.");
         this->SPA_STRING = wxString::FromUTF8(opts.spa_data);
-    } else {
+    /*} else {  //could retain this for libfko without gpg support
         fko_get_encoded_data(ctx, &spa_buf_ptr);
         fko_get_spa_digest(ctx, &spa_digest_ptr);
         sprintf(spa_buf,"%s:%s", spa_buf_ptr, spa_digest_ptr);
@@ -308,7 +326,7 @@ wxString Config::gen_SPA(wxString ip_resolver_url, gpgme_wrapper * ourGPG)
         strcat(crypt_buf, hmac_buf);
         this->SPA_STRING = wxString::FromUTF8(crypt_buf + 2);
 
-    }
+    }*/
 
 
     return _("Success");

@@ -75,6 +75,7 @@ class fwknop_guiFrame: public wxFrame
         wxBoxSizer *hGPGChoiceBox;
         wxChoice *GPGEncryptKey;
         wxChoice *GPGSignatureKey;
+        wxScrolledWindow *vConfigScroll;
 
 
 
@@ -93,6 +94,8 @@ class fwknop_guiFrame: public wxFrame
             idMenuImport,
             idMenuExport,
             idMenuQR,
+            idMenugpgEngine,
+            idMenugpgFolder,
             idMenuGPGTools,
             ID_AllowIP,
             ID_MessType,
@@ -119,6 +122,8 @@ class fwknop_guiFrame: public wxFrame
         void OnImport(wxCommandEvent& event);
         void OnExport(wxCommandEvent& event);
         void OnQR(wxCommandEvent& event);
+        void gpgEngine(wxCommandEvent& event);
+        void gpgFolder(wxCommandEvent& event);
         void OnChoice(wxCommandEvent& event);
         void OnSave(wxCommandEvent& event);
         void OnLoad(wxCommandEvent& event);

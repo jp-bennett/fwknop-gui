@@ -59,6 +59,8 @@ BEGIN_EVENT_TABLE(fwknop_guiFrame, wxFrame)
     EVT_MENU(idMenuImport, fwknop_guiFrame::OnImport)
     EVT_MENU(idMenuExport, fwknop_guiFrame::OnExport)
     EVT_MENU(idMenuQR, fwknop_guiFrame::OnQR)
+    EVT_MENU(idMenugpgEngine, fwknop_guiFrame::gpgEngine)
+    EVT_MENU(idMenugpgFolder, fwknop_guiFrame::gpgFolder)
     EVT_CHECKBOX(ID_Random, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_AllowIP, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_MessType, fwknop_guiFrame::OnChoice)
@@ -89,12 +91,16 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
     toolsMenu->Append(idMenuExport, _("&Export as fwknoprc file"));
     toolsMenu->Append(idMenuQR, _("&Export as QR code"));
     mbar->Append(toolsMenu, _("&Tools"));
+
     wxMenu* GPGMenu = new wxMenu(_T(""));
+
     mbar->Append(GPGMenu, _("&GPG"));
     ourGPG = new gpgme_wrapper;
     if (ourGPG->doInit()) {
-        GPGMenu->Append(idMenuGPGTools, _("&GPG Tools"), _("GPG tools and options"));
+        GPGMenu->Append(idMenugpgFolder, _("&GPG Home"), _("GPG Home Directory"));
+        GPGMenu->Append(idMenugpgEngine, _("&GPG Engine"), _("GPG Engine"));
     }
+    //ourGPG->selectHomeDir();
     GPGKeys = new wxArrayString;
     GPGSigKeys = new wxArrayString;
     ourGPG->getAllKeys(GPGKeys);
@@ -122,7 +128,7 @@ this->SetBackgroundColour(*BackGround);
 hbox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *vListBox = new wxBoxSizer(wxVERTICAL);
 vConfigBox = new wxBoxSizer(wxVERTICAL);
-wxScrolledWindow *vConfigScroll = new wxScrolledWindow(this);
+vConfigScroll = new wxScrolledWindow(this);
 
 
 //The following are the sizers for each line of config:
@@ -746,6 +752,29 @@ void fwknop_guiFrame::OnLink(wxHtmlLinkEvent &event)
 {
     wxLaunchDefaultBrowser(event.GetLinkInfo().GetHref());
 
+}
+
+void fwknop_guiFrame::gpgEngine(wxCommandEvent &event)
+{
+    ourGPG->selectEngine();
+    ourGPG->getAllKeys(GPGKeys);
+    ourGPG->getAllKeys(GPGSigKeys);
+    GPGEncryptKey->Clear();
+    GPGEncryptKey->Append(*GPGKeys);
+    GPGSignatureKey->Clear();
+    GPGSignatureKey->Append(*GPGSigKeys);
+
+}
+
+void fwknop_guiFrame::gpgFolder(wxCommandEvent &event)
+{
+    ourGPG->selectHomeDir();
+    ourGPG->getAllKeys(GPGKeys);
+    ourGPG->getAllKeys(GPGSigKeys);
+    GPGEncryptKey->Clear();
+    GPGEncryptKey->Append(*GPGKeys);
+    GPGSignatureKey->Clear();
+    GPGSignatureKey->Append(*GPGSigKeys);
 }
 
 void fwknop_guiFrame::populate()

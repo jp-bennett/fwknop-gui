@@ -3,7 +3,8 @@
 bool gpgme_wrapper::doInit() {
 //do initialization code here
 //check for already loaded
-    dl.Load(dl.CanonicalizeName("gpgme"));
+gpgme_engine_info_t tmp_Info;
+/*    dl.Load(dl.CanonicalizeName("gpgme"));
     if (!dl.IsLoaded())
     return 0;
 
@@ -25,18 +26,19 @@ bool gpgme_wrapper::doInit() {
     gpgme_op_encrypt_sign_ptr =     (gpgme_error_t (*) (gpgme_ctx_t ctx, gpgme_key_t recp[], gpgme_encrypt_flags_t flags, gpgme_data_t plain, gpgme_data_t cipher))dl.GetSymbol(wxT("gpgme_op_encrypt_sign"));
     gpgme_set_protocol_ptr =        (gpgme_error_t (*) (gpgme_ctx_t ctx, gpgme_protocol_t proto))dl.GetSymbol(wxT("gpgme_set_protocol"));
     gpgme_set_armor_ptr =           (void (*) (gpgme_ctx_t ctx, int yes))dl.GetSymbol(wxT("gpgme_set_armor"));
-
+*/
     //Starts the actual init
-    gpgme_check_version_ptr(nullptr);
+    gpgme_check_version(nullptr);
 
-    gpgerr = gpgme_new_ptr(&gpgcon);
+    gpgerr = gpgme_new(&gpgcon);
     if (gpgerr != GPG_ERR_NO_ERROR) {
-        wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror_ptr(gpgerr)));
+        wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror(gpgerr)));
         return 0;
     }
 
-
-
+tmp_Info = gpgme_ctx_get_engine_info(gpgcon);
+gpgEngine = _(tmp_Info->file_name);
+gpgHomeFolder = _(tmp_Info->home_dir);
     enabled = true;
     return 1;
 
@@ -48,16 +50,16 @@ bool gpgme_wrapper::doInit() {
 void gpgme_wrapper::getAllKeys(wxArrayString * keys) {
     gpgme_key_t tmpKey;
     keys->Empty();
-    gpgerr = gpgme_op_keylist_start_ptr(gpgcon, 0, 0);
+    gpgerr = gpgme_op_keylist_start(gpgcon, 0, 0);
     if (gpgerr != GPG_ERR_NO_ERROR)
     return;
-    while (gpgme_op_keylist_next_ptr(gpgcon, &tmpKey) != GPG_ERR_EOF) {
+    while (gpgme_op_keylist_next(gpgcon, &tmpKey) != GPG_ERR_EOF) {
     //gpgme_op_keylist_next_ptr(gpgcon, &tmpKey);
         if (tmpKey == 0)
             break;
-        keys->Insert(_(gpgme_key_get_string_attr_ptr(tmpKey, GPGME_ATTR_KEYID, 0, 0)).Right(8), 0);
+        keys->Insert(_(gpgme_key_get_string_attr(tmpKey, GPGME_ATTR_KEYID, 0, 0)).Right(8), 0);
     }
-    gpgme_op_keylist_end_ptr(gpgcon);
+    gpgme_op_keylist_end(gpgcon);
 
 }
 bool gpgme_wrapper::encryptAndSign(wxString encryptKey, wxString sigKey, char * plaintext, char * cipher) {
@@ -71,30 +73,30 @@ bool gpgme_wrapper::encryptAndSign(wxString encryptKey, wxString sigKey, char * 
     buf_len = new size_t;
     char *ndx;
 
-    gpgerr = gpgme_data_new_from_mem_ptr(&plain_data, plaintext, strlen(plaintext), 1);
+    gpgerr = gpgme_data_new_from_mem(&plain_data, plaintext, strlen(plaintext), 1);
     if (gpgerr != GPG_ERR_NO_ERROR) {
-        wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror_ptr(gpgerr)));
+        wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror(gpgerr)));
         return 0;
     }
-    gpgerr = gpgme_data_new_ptr(&cipher_data);
+    gpgerr = gpgme_data_new(&cipher_data);
     if (gpgerr != GPG_ERR_NO_ERROR) {
-        wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror_ptr(gpgerr)));
+        wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror(gpgerr)));
         return 0;
     }
     strcpy(key_buf, (const char*)encryptKey.mb_str(wxConvUTF8));
-    gpgerr = gpgme_get_key_ptr(gpgcon, key_buf, &key[0], 0);
+    gpgerr = gpgme_get_key(gpgcon, key_buf, &key[0], 0);
     if (gpgerr != GPG_ERR_NO_ERROR) {
-        wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror_ptr(gpgerr)));
+        wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror(gpgerr)));
         return 0;
     }
-    gpgme_set_protocol_ptr(gpgcon, GPGME_PROTOCOL_OpenPGP);
-    gpgme_set_armor_ptr(gpgcon, 0);
+    gpgme_set_protocol(gpgcon, GPGME_PROTOCOL_OpenPGP);
+    gpgme_set_armor(gpgcon, 0);
 
-    gpgme_signers_clear_ptr(gpgcon);
+    gpgme_signers_clear(gpgcon);
     if (sigKey.CmpNoCase(wxT("None")) == 0) {
-        gpgerr = gpgme_op_encrypt_ptr(gpgcon, key, GPGME_ENCRYPT_ALWAYS_TRUST, plain_data, cipher_data);
+        gpgerr = gpgme_op_encrypt(gpgcon, key, GPGME_ENCRYPT_ALWAYS_TRUST, plain_data, cipher_data);
         if (gpgerr != GPG_ERR_NO_ERROR) {
-            wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror_ptr(gpgerr)));
+            wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror(gpgerr)));
             return 0;
         }
 
@@ -102,15 +104,15 @@ bool gpgme_wrapper::encryptAndSign(wxString encryptKey, wxString sigKey, char * 
 
     } else {
         strcpy(key_buf, (const char*)sigKey.mb_str(wxConvUTF8));
-        gpgerr = gpgme_get_key_ptr(gpgcon, key_buf, &sig_key, 0);
+        gpgerr = gpgme_get_key(gpgcon, key_buf, &sig_key, 0);
         if (gpgerr != GPG_ERR_NO_ERROR) {
-            wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror_ptr(gpgerr)));
+            wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror(gpgerr)));
             return 0;
         }
-        gpgme_signers_add_ptr(gpgcon, sig_key);
-        gpgme_op_encrypt_sign_ptr(gpgcon, key, GPGME_ENCRYPT_ALWAYS_TRUST, plain_data, cipher_data);
+        gpgme_signers_add(gpgcon, sig_key);
+        gpgme_op_encrypt_sign(gpgcon, key, GPGME_ENCRYPT_ALWAYS_TRUST, plain_data, cipher_data);
     }
-    buf = gpgme_data_release_and_get_mem_ptr(cipher_data, buf_len);
+    buf = gpgme_data_release_and_get_mem(cipher_data, buf_len);
     if (buf == nullptr)
         return 0;
     wxBase64Encode(cipher, 4096, buf, *buf_len);
@@ -118,4 +120,20 @@ bool gpgme_wrapper::encryptAndSign(wxString encryptKey, wxString sigKey, char * 
         *ndx = '\0';
 //base64 encode before returning
 return 1;
+}
+
+void gpgme_wrapper::selectHomeDir() {
+    wxDirDialog dlg(NULL, _("Choose GPG directory"), wxEmptyString, wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
+    dlg.ShowModal();
+    gpgHomeFolder = dlg.GetPath();
+    gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), (const char*)gpgHomeFolder.mb_str(wxConvUTF8));
+
+}
+
+void gpgme_wrapper::selectEngine() {
+    wxFileDialog dlg(NULL, _("Choose gpg or gpg2 executable"));
+    dlg.ShowModal();
+    gpgEngine = dlg.GetPath();
+    gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), (const char*)gpgHomeFolder.mb_str(wxConvUTF8));
+
 }

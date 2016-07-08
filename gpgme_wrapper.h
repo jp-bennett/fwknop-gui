@@ -13,6 +13,10 @@ class gpgme_wrapper {
         bool doInit();
         void getAllKeys(wxArrayString * keys);
         bool encryptAndSign(wxString encryptKey, wxString sigKey, char * plaintext, char * cipher);
+        void selectHomeDir();
+        void selectEngine();
+        wxString gpgEngine;
+        wxString gpgHomeFolder;
         // get key list function
         // encrypt data function
         //sign data function
@@ -20,6 +24,7 @@ class gpgme_wrapper {
 
 
     private:
+    /*
         //Pointers that will contain the functions we're interested in
         gpgme_error_t (* gpgme_new_ptr) (gpgme_ctx_t *ctx); //Defines the pointer for gpgme_new
         const char * (* gpgme_strerror_ptr) (gpgme_error_t err);//Defines the pointer for gpgme_strerror
@@ -40,7 +45,9 @@ class gpgme_wrapper {
         void (* gpgme_set_armor_ptr) (gpgme_ctx_t ctx, int yes);
 
         wxDynamicLibrary dl;
+        */
         gpgme_ctx_t gpgcon;
         gpgme_error_t gpgerr;
+
 };
 #endif
