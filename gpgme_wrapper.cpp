@@ -51,8 +51,10 @@ void gpgme_wrapper::getAllKeys(wxArrayString * keys) {
     gpgme_key_t tmpKey;
     keys->Empty();
     gpgerr = gpgme_op_keylist_start(gpgcon, 0, 0);
-    if (gpgerr != GPG_ERR_NO_ERROR)
+    if (gpgerr != GPG_ERR_NO_ERROR){
+    wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror(gpgerr)));
     return;
+    }
     while (gpgme_op_keylist_next(gpgcon, &tmpKey) != GPG_ERR_EOF) {
     //gpgme_op_keylist_next_ptr(gpgcon, &tmpKey);
         if (tmpKey == 0)

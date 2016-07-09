@@ -46,10 +46,12 @@ set(CODE_FILES
 add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
   ${CODE_FILES}
   )
+set_property(TARGET fwknop-gui PROPERTY CXX_STANDARD 11)
+set_property(TARGET fwknop-gui PROPERTY CXX_STANDARD_REQUIRED ON)
 
 SET_TARGET_PROPERTIES(fwknop-gui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
-target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES} ${LIBQRENCODE_LIBRARIES})
+target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES} ${LIBQRENCODE_LIBRARIES} ${GPGME_VANILLA_LIBRARIES})
 if(IS_LINUX)
   install(FILES help.html DESTINATION share/fwknop-gui)
   install(TARGETS fwknop-gui DESTINATION bin)
@@ -58,7 +60,7 @@ if(IS_LINUX)
 endif()
 if(IS_WIN32)
   include_directories( ${LIBQRENCODE_INCLUDE_DIR} )
-  target_link_libraries(fwknop-gui wsock32 ws2_32 ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES})
+  target_link_libraries(fwknop-gui wsock32 ws2_32 ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES} ${GPGME_VANILLA_LIBRARIES})
   set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
   include_directories(${LIBQRENCODE_INCLUDE_DIR})
 endif()
