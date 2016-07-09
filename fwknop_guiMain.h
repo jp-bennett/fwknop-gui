@@ -58,6 +58,7 @@ class fwknop_guiFrame: public wxFrame
         wxTextCtrl *IPToAllowTxt;
         wxTextCtrl *AccessPortsTxt;
         wxTextCtrl *FwTimeTxt;
+        wxCheckBox *TimerChk;
         wxCheckBox *KeepOpenChk;
         wxTextCtrl *InternalIPTxt;
         wxTextCtrl *InternalPortTxt;
@@ -96,6 +97,7 @@ class fwknop_guiFrame: public wxFrame
             idMenuQR,
             idMenugpgEngine,
             idMenugpgFolder,
+            idMenugpgDefaults,
             idMenuGPGTools,
             ID_AllowIP,
             ID_MessType,
@@ -124,6 +126,7 @@ class fwknop_guiFrame: public wxFrame
         void OnQR(wxCommandEvent& event);
         void gpgEngine(wxCommandEvent& event);
         void gpgFolder(wxCommandEvent& event);
+        void gpgDefaults(wxCommandEvent& event);
         void OnChoice(wxCommandEvent& event);
         void OnSave(wxCommandEvent& event);
         void OnLoad(wxCommandEvent& event);

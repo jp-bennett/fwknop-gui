@@ -1,6 +1,6 @@
 #include "gpgme_wrapper.h"
 
-bool gpgme_wrapper::doInit() {
+bool gpgme_wrapper::doInit(wxFileConfig * configFile) {
 //do initialization code here
 //check for already loaded
 gpgme_engine_info_t tmp_Info;
@@ -37,8 +37,18 @@ gpgme_engine_info_t tmp_Info;
     }
 
 tmp_Info = gpgme_ctx_get_engine_info(gpgcon);
-gpgEngine = _(tmp_Info->file_name);
-gpgHomeFolder = _(tmp_Info->home_dir);
+gpgEngineDefault = _(tmp_Info->file_name); //I know of no other way to get the default setting, so we grab it before we restore saved settings
+//gpgEngine = _(tmp_Info->file_name);
+//gpgHomeFolder = _(tmp_Info->home_dir);
+
+
+configFile->SetPath(wxT("/"));
+gpgEngine = configFile->Read(wxT("gpg_engine"), _(tmp_Info->file_name));
+gpgHomeFolder = configFile->Read(wxT("gpg_home_folder"), _(tmp_Info->home_dir));
+if (gpgHomeFolder.IsEmpty())
+gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), nullptr);
+else
+gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), (const char*)gpgHomeFolder.mb_str(wxConvUTF8));
     enabled = true;
     return 1;
 
@@ -124,18 +134,44 @@ bool gpgme_wrapper::encryptAndSign(wxString encryptKey, wxString sigKey, char * 
 return 1;
 }
 
-void gpgme_wrapper::selectHomeDir() {
-    wxDirDialog dlg(NULL, _("Choose GPG directory"), wxEmptyString, wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
-    dlg.ShowModal();
-    gpgHomeFolder = dlg.GetPath();
-    gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), (const char*)gpgHomeFolder.mb_str(wxConvUTF8));
+bool gpgme_wrapper::selectHomeDir(wxFileConfig * configFile) {
+    configFile->SetPath(wxT("/"));
+    wxDirDialog dlg(NULL, _("Choose GPG directory"), gpgHomeFolder, wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
+    if(dlg.ShowModal() == wxID_OK){
+        gpgHomeFolder = dlg.GetPath();
+        configFile->Write(_("gpg_home_folder"), gpgHomeFolder);
+        gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), (const char*)gpgHomeFolder.mb_str(wxConvUTF8));
+        return true;
+    } else {
+        return false;
+    }
 
 }
 
-void gpgme_wrapper::selectEngine() {
-    wxFileDialog dlg(NULL, _("Choose gpg or gpg2 executable"));
-    dlg.ShowModal();
-    gpgEngine = dlg.GetPath();
-    gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), (const char*)gpgHomeFolder.mb_str(wxConvUTF8));
+bool gpgme_wrapper::selectEngine(wxFileConfig * configFile) {
+    configFile->SetPath(wxT("/"));
+    wxFileDialog dlg(NULL, _("Choose gpg or gpg2 executable"), wxEmptyString, gpgEngine);
+    if (dlg.ShowModal() == wxID_OK){
+        gpgEngine = dlg.GetPath();
+        configFile->Write(_("gpg_engine"), gpgEngine);
+        gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), (const char*)gpgHomeFolder.mb_str(wxConvUTF8));
+        return true;
+    } else {
+        return false;
+    }
+}
 
+bool gpgme_wrapper::setDefaults(wxFileConfig * configFile) {
+    configFile->SetPath(wxT("/"));
+    wxMessageDialog dlg(NULL, _("Are you sure you want to reset GPG?"), _("Confirm"), wxYES_NO);
+    if (dlg.ShowModal() == wxID_YES){
+        gpgEngine = gpgEngineDefault;
+        gpgHomeFolder = wxEmptyString;
+        configFile->Write(_("gpg_engine"), gpgEngine);
+        configFile->Write(_("gpg_home_folder"), wxEmptyString);
+        gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), nullptr);
+        return true;
+    } else {
+        return false;
+    }
 }

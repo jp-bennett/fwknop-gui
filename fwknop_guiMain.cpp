@@ -61,6 +61,7 @@ BEGIN_EVENT_TABLE(fwknop_guiFrame, wxFrame)
     EVT_MENU(idMenuQR, fwknop_guiFrame::OnQR)
     EVT_MENU(idMenugpgEngine, fwknop_guiFrame::gpgEngine)
     EVT_MENU(idMenugpgFolder, fwknop_guiFrame::gpgFolder)
+    EVT_MENU(idMenugpgDefaults, fwknop_guiFrame::gpgDefaults)
     EVT_CHECKBOX(ID_Random, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_AllowIP, fwknop_guiFrame::OnChoice)
     EVT_CHOICE(ID_MessType, fwknop_guiFrame::OnChoice)
@@ -74,6 +75,7 @@ END_EVENT_TABLE()
 fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
     : wxFrame(frame, wxID_ANY, title, wxPoint(-1, -1), wxSize(800, 600))
 {
+    configFile = new wxFileConfig (wxT("fwknop-gui"));
 //#if wxUSE_MENUS
     // create a menu bar
     wxMenuBar* mbar = new wxMenuBar();
@@ -96,9 +98,10 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
 
     mbar->Append(GPGMenu, _("&GPG"));
     ourGPG = new gpgme_wrapper;
-    if (ourGPG->doInit()) {
+    if (ourGPG->doInit(configFile)) {
         GPGMenu->Append(idMenugpgFolder, _("&GPG Home"), _("GPG Home Directory"));
         GPGMenu->Append(idMenugpgEngine, _("&GPG Engine"), _("GPG Engine"));
+        GPGMenu->Append(idMenugpgDefaults, _("&GPG Defaults"), _("Resets GPG Engine and Folder to defaults"));
     }
     //ourGPG->selectHomeDir();
     GPGKeys = new wxArrayString;
@@ -159,7 +162,7 @@ wxBoxSizer *hHmacTypeBox = new wxBoxSizer(wxHORIZONTAL);
 initMessTypeEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_MessType);
 initAllowIPEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_AllowIP);
 initCheckboxEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_Random);
-configFile = new wxFileConfig (wxT("fwknop-gui"));
+
 
 ourConfigList = new wxArrayString;
 ourConfig = new Config;
@@ -335,9 +338,11 @@ FwTimeTxt = new wxTextCtrl(vConfigScroll, wxID_ANY, wxT("60"));
 hFwTimeBox->Add(FwTimeLbl,0,wxALIGN_BOTTOM);
 hFwTimeBox->Add(FwTimeTxt,1, wxEXPAND);
 
-KeepOpenChk = new wxCheckBox(vConfigScroll, wxID_ANY,wxT("Keep port open by automatically resending SPA packets"));
-
+//TimerChk = new wxCheckBox(vConfigScroll, wxID_ANY,wxT("Show countdown timer"));
+KeepOpenChk = new wxCheckBox(vConfigScroll, wxID_ANY,wxT("Automatically resend SPA packets"));
+//hKeepAliveBox->Add(TimerChk);
 hKeepAliveBox->Add(KeepOpenChk);
+
 
 
 wxStaticText *InternalIPLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Internal IP: "));
@@ -756,25 +761,39 @@ void fwknop_guiFrame::OnLink(wxHtmlLinkEvent &event)
 
 void fwknop_guiFrame::gpgEngine(wxCommandEvent &event)
 {
-    ourGPG->selectEngine();
-    ourGPG->getAllKeys(GPGKeys);
-    ourGPG->getAllKeys(GPGSigKeys);
-    GPGEncryptKey->Clear();
-    GPGEncryptKey->Append(*GPGKeys);
-    GPGSignatureKey->Clear();
-    GPGSignatureKey->Append(*GPGSigKeys);
+    if (ourGPG->selectEngine(configFile)) {
+        ourGPG->getAllKeys(GPGKeys);
+        ourGPG->getAllKeys(GPGSigKeys);
+        GPGEncryptKey->Clear();
+        GPGEncryptKey->Append(*GPGKeys);
+        GPGSignatureKey->Clear();
+        GPGSignatureKey->Append(*GPGSigKeys);
+    }
 
 }
 
 void fwknop_guiFrame::gpgFolder(wxCommandEvent &event)
 {
-    ourGPG->selectHomeDir();
-    ourGPG->getAllKeys(GPGKeys);
-    ourGPG->getAllKeys(GPGSigKeys);
-    GPGEncryptKey->Clear();
-    GPGEncryptKey->Append(*GPGKeys);
-    GPGSignatureKey->Clear();
-    GPGSignatureKey->Append(*GPGSigKeys);
+    if (ourGPG->selectHomeDir(configFile)) {
+        ourGPG->getAllKeys(GPGKeys);
+        ourGPG->getAllKeys(GPGSigKeys);
+        GPGEncryptKey->Clear();
+        GPGEncryptKey->Append(*GPGKeys);
+        GPGSignatureKey->Clear();
+        GPGSignatureKey->Append(*GPGSigKeys);
+    }
+}
+
+void fwknop_guiFrame::gpgDefaults(wxCommandEvent &event)
+{
+    if (ourGPG->setDefaults(configFile)) { //ask if sure
+        ourGPG->getAllKeys(GPGKeys);
+        ourGPG->getAllKeys(GPGSigKeys);
+        GPGEncryptKey->Clear();
+        GPGEncryptKey->Append(*GPGKeys);
+        GPGSignatureKey->Clear();
+        GPGSignatureKey->Append(*GPGSigKeys);
+    }
 }
 
 void fwknop_guiFrame::populate()

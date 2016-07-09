@@ -4,17 +4,19 @@
 #include <wx/dynlib.h>
 #include <wx/wx.h>
 #include <wx/base64.h>
+#include <wx/config.h>
 
 class gpgme_wrapper {
     public:
         bool enabled;
         wxString currError;  // or make a function or two?
 
-        bool doInit();
+        bool doInit(wxFileConfig * configFile);
         void getAllKeys(wxArrayString * keys);
         bool encryptAndSign(wxString encryptKey, wxString sigKey, char * plaintext, char * cipher);
-        void selectHomeDir();
-        void selectEngine();
+        bool selectHomeDir(wxFileConfig * configFile);
+        bool selectEngine(wxFileConfig * configFile);
+        bool setDefaults(wxFileConfig * configFile);
         wxString gpgEngine;
         wxString gpgHomeFolder;
         // get key list function
@@ -48,6 +50,7 @@ class gpgme_wrapper {
         */
         gpgme_ctx_t gpgcon;
         gpgme_error_t gpgerr;
+        wxString gpgEngineDefault;
 
 };
 #endif
