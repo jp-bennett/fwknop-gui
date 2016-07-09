@@ -1,6 +1,7 @@
 #include "timer.h"
 
 BEGIN_EVENT_TABLE(timerDialog, wxDialog)
+    EVT_CLOSE(timerDialog::onClose)
     EVT_TIMER(ID_SECOND_TIMER, timerDialog::tickTock)
 END_EVENT_TABLE()
 
@@ -28,10 +29,10 @@ timerDialog::timerDialog(const wxString & title, Config *selectedConfig, wxIPV4a
 
     SetSizer(vbox);
     Centre();
-    ShowModal();
-    second_timer->Stop();
+    Show();
+    //second_timer->Stop();
 
-    Destroy();
+    //Destroy();
     //delete this;
 
 }
@@ -50,6 +51,14 @@ void timerDialog::tickTock(wxTimerEvent &event)
             }
         }
     }
+}
+
+void timerDialog::onClose(wxCloseEvent& event) {
+    second_timer->Stop();
+    delete second_timer;
+    delete main_timer;
+    delete timerText;
+    Destroy();
 }
 
 //Start with the time specified

@@ -14,12 +14,13 @@ private:
   wxTimer *second_timer;
   Config *ourConfig;
   wxIPV4address *ourAddr;
-
+void onClose(wxCloseEvent& event);
   enum
   {
     ID_SECOND_TIMER
   };
   void tickTock(wxTimerEvent& event);
+
   DECLARE_EVENT_TABLE()
 };
 
