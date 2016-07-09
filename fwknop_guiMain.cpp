@@ -472,6 +472,7 @@ void fwknop_guiFrame::OnSave(wxCommandEvent &event)
         ourConfig->getAllConfigs(ourConfigList, configFile);
         listbox->Clear();
         listbox->InsertItems(*ourConfigList,0);
+        listbox->SetStringSelection(ourConfig->NICK_NAME);
         wxMessageBox(_("Save Successful."));
     } else {
         wxMessageBox(result);

@@ -5,7 +5,6 @@ class timerDialog : public wxDialog
 {
 public:
   timerDialog(const wxString& title, Config *selectedConfig, wxIPV4address *serverAddr);
-
 private:
   wxTextCtrl *tc;
   int time_left;
@@ -14,6 +13,7 @@ private:
   wxTimer *second_timer;
   Config *ourConfig;
   wxIPV4address *ourAddr;
+
 void onClose(wxCloseEvent& event);
   enum
   {
