@@ -38,7 +38,8 @@ void timerDialog::tickTock(wxTimerEvent &event)
 {
     timerText->SetLabel(wxString::Format(wxT("%ld"), time_left - (main_timer->Time()/1000)));
     if (time_left - (main_timer->Time()/1000) < 1) {
-        EndModal( wxID_OK);
+    second_timer->Stop();
+        this->EndDialog(wxID_OK);
     }
     if (time_left - (main_timer->Time()/1000) < 11  && ourConfig->KEEP_OPEN) {
         ourConfig->gen_SPA(_(""), nullptr);
