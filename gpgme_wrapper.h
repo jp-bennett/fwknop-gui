@@ -5,6 +5,7 @@
 #include <wx/wx.h>
 #include <wx/base64.h>
 #include <wx/config.h>
+#include <wx/fileconf.h>
 
 class gpgme_wrapper {
     public:

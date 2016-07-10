@@ -567,7 +567,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     wxString SPA_Result;
 
     ourConfig->loadConfig(listbox->GetString(listbox->GetSelection()), configFile);
-    if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
+    if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0 && !ourConfig->USE_GPG_CRYPT)
         ourConfig->KEY = wxGetPasswordFromUser(_("Please enter your Rijndael key"));
 
     if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
@@ -765,6 +765,7 @@ void fwknop_guiFrame::gpgEngine(wxCommandEvent &event)
     if (ourGPG->selectEngine(configFile)) {
         ourGPG->getAllKeys(GPGKeys);
         ourGPG->getAllKeys(GPGSigKeys);
+        GPGSigKeys->Insert( _("None"), 0);
         GPGEncryptKey->Clear();
         GPGEncryptKey->Append(*GPGKeys);
         GPGSignatureKey->Clear();
@@ -778,6 +779,7 @@ void fwknop_guiFrame::gpgFolder(wxCommandEvent &event)
     if (ourGPG->selectHomeDir(configFile)) {
         ourGPG->getAllKeys(GPGKeys);
         ourGPG->getAllKeys(GPGSigKeys);
+        GPGSigKeys->Insert( _("None"), 0);
         GPGEncryptKey->Clear();
         GPGEncryptKey->Append(*GPGKeys);
         GPGSignatureKey->Clear();
@@ -790,6 +792,7 @@ void fwknop_guiFrame::gpgDefaults(wxCommandEvent &event)
     if (ourGPG->setDefaults(configFile)) { //ask if sure
         ourGPG->getAllKeys(GPGKeys);
         ourGPG->getAllKeys(GPGSigKeys);
+        GPGSigKeys->Insert( _("None"), 0);
         GPGEncryptKey->Clear();
         GPGEncryptKey->Append(*GPGKeys);
         GPGSignatureKey->Clear();
