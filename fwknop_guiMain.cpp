@@ -567,11 +567,11 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     wxString SPA_Result;
 
     ourConfig->loadConfig(listbox->GetString(listbox->GetSelection()), configFile);
-    if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0 && !ourConfig->USE_GPG_CRYPT)
+    if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0 && !ourConfig->USE_GPG_CRYPT) {
         ourConfig->KEY = wxGetPasswordFromUser(_("Please enter your Rijndael key"));
-
-    if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
-        return;
+        if (ourConfig->KEY.CmpNoCase(wxEmptyString) == 0)
+            return;
+    }
 
     if (ourConfig->ACCESS_IP.CmpNoCase(_("Prompt IP")) == 0)
         ourConfig->ACCESS_IP = wxGetTextFromUser(_("Please enter your Access IP"));

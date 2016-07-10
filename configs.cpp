@@ -175,7 +175,7 @@ wxString Config::gen_SPA(wxString ip_resolver_url, gpgme_wrapper * ourGPG)
 
     memset(&opts, 0, sizeof(fwknop_options_t));
 
-    if (this->KEY.IsEmpty())
+    if (this->KEY.IsEmpty() && !this->USE_GPG_CRYPT)
         return _("Key cannot be blank!");
 
     wxBusyInfo wait(_("Please wait, working..."));
