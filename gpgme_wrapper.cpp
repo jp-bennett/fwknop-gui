@@ -27,6 +27,7 @@ gpgme_engine_info_t tmp_Info;
     gpgme_set_protocol_ptr =        (gpgme_error_t (*) (gpgme_ctx_t ctx, gpgme_protocol_t proto))dl.GetSymbol(wxT("gpgme_set_protocol"));
     gpgme_set_armor_ptr =           (void (*) (gpgme_ctx_t ctx, int yes))dl.GetSymbol(wxT("gpgme_set_armor"));
 */
+configFile->SetPath(wxT("/"));
     //Starts the actual init
     gpgme_check_version(nullptr);
 
@@ -37,20 +38,35 @@ gpgme_engine_info_t tmp_Info;
     }
 
 tmp_Info = gpgme_ctx_get_engine_info(gpgcon);
+if (!tmp_Info->version && (configFile->Read(wxT("show_gpg"), _("true")).CmpNoCase(_("true")) == 0)) {
+    if (wxPlatformInfo::Get().GetOperatingSystemId() == wxOS_WINDOWS) {
+        wxRichMessageDialog dlg(NULL, _("GPG engine missing, launch browser to download?"), _("GPG engine missing"), wxYES_NO);
+        dlg.ShowCheckBox("Don't show this dialog again");
+        if (dlg.ShowModal() == wxID_YES) {
+            wxLaunchDefaultBrowser(_("https://files.gpg4win.org/gpg4win-2.3.2.exe"));
+        }
+        if ( dlg.IsCheckBoxChecked() ) {
+            configFile->Write(wxT("show_gpg"), _("false"));
+            configFile->Flush();
+        }
+    } else {
+        wxMessageBox(_("Couldn't initialize gpg engine, is gpg or gpg2 installed?"));
+    }
+
+
+}
 gpgEngineDefault = _(tmp_Info->file_name); //I know of no other way to get the default setting, so we grab it before we restore saved settings
-//gpgEngine = _(tmp_Info->file_name);
-//gpgHomeFolder = _(tmp_Info->home_dir);
 
-
-configFile->SetPath(wxT("/"));
 gpgEngine = configFile->Read(wxT("gpg_engine"), _(tmp_Info->file_name));
 gpgHomeFolder = configFile->Read(wxT("gpg_home_folder"), _(tmp_Info->home_dir));
 if (gpgHomeFolder.IsEmpty())
 gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), nullptr);
 else
 gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), (const char*)gpgHomeFolder.mb_str(wxConvUTF8));
+
     enabled = true;
     return 1;
+
 
 
 
@@ -140,6 +156,7 @@ bool gpgme_wrapper::selectHomeDir(wxFileConfig * configFile) {
     if(dlg.ShowModal() == wxID_OK){
         gpgHomeFolder = dlg.GetPath();
         configFile->Write(_("gpg_home_folder"), gpgHomeFolder);
+        configFile->Flush();
         gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), (const char*)gpgHomeFolder.mb_str(wxConvUTF8));
         return true;
     } else {
@@ -154,6 +171,7 @@ bool gpgme_wrapper::selectEngine(wxFileConfig * configFile) {
     if (dlg.ShowModal() == wxID_OK){
         gpgEngine = dlg.GetPath();
         configFile->Write(_("gpg_engine"), gpgEngine);
+        configFile->Flush();
         gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), (const char*)gpgHomeFolder.mb_str(wxConvUTF8));
         return true;
     } else {
@@ -169,6 +187,7 @@ bool gpgme_wrapper::setDefaults(wxFileConfig * configFile) {
         gpgHomeFolder = wxEmptyString;
         configFile->Write(_("gpg_engine"), gpgEngine);
         configFile->Write(_("gpg_home_folder"), wxEmptyString);
+        configFile->Flush();
         gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), nullptr);
         return true;
     } else {
