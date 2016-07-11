@@ -405,7 +405,7 @@ vConfigBox->Add(hKeepAliveBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hInternalIPBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hInternalPortBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hServCmdBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
-vConfigBox->Add(save,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
+vConfigBox->Add(save,1,wxALIGN_RIGHT | wxALIGN_BOTTOM | wxEXPAND | wxALL,2);  // would like to move this outside the scroll box, but it blows up when I try
 
 OnChoice(*initMessTypeEvent);
 OnChoice(*initAllowIPEvent);
@@ -415,13 +415,13 @@ vConfigScroll->FitInside(); // ask the sizer about the needed size
 vConfigScroll->SetScrollRate(5, 5);
 
 hbox->Add(vConfigScroll, 1, wxALIGN_CENTER_HORIZONTAL | wxTOP | wxEXPAND, 5);
+
 this->SetSizer(hbox);
 
 }
 
 void fwknop_guiFrame::OnSave(wxCommandEvent &event)
 {
-//All sorts of input validation here, port the android code
 
 //also, on android, need to detect changes to the config, because send knock with edits is broken. Similar idea, perhaps.
 
@@ -587,7 +587,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     ourConfig->SERVER_IP = serverAddr.IPAddress();
 
     configFile->SetPath(wxT("/"));
-    SPA_Result = ourConfig->gen_SPA(configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")), ourGPG);
+    SPA_Result = ourConfig->gen_SPA(configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")), ourGPG->gpgEngine, ourGPG->gpgHomeFolder);
     if (SPA_Result.CmpNoCase(wxT("Success")) != 0 ) {
         wxMessageBox(SPA_Result);
         return;
@@ -598,7 +598,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
         wxMessageBox(SPA_Result);
         return;
     } else if ((configFile->Read(wxT("show_timer"), _("true")).CmpNoCase(_("true")) == 0) || (ourConfig->KEEP_OPEN)){
-        timerDialog *ourTimer = new timerDialog(ourConfig->NICK_NAME, ourConfig, &serverAddr);
+        timerDialog *ourTimer = new timerDialog(ourConfig->NICK_NAME, ourConfig, &serverAddr, ourGPG);
         ourTimer->Show();
         return;
     } else {
@@ -607,11 +607,6 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     }
 }
 
-
-fwknop_guiFrame::~fwknop_guiFrame()
-{
-
-}
 
 void fwknop_guiFrame::OnNew(wxCommandEvent &event)
 {

@@ -26,7 +26,7 @@ class fwknop_guiFrame: public wxFrame
 {
     public:
         fwknop_guiFrame(wxFrame *frame, const wxString& title);
-        ~fwknop_guiFrame();
+       // ~fwknop_guiFrame();
     private:
         wxBoxSizer *hbox;
         wxBoxSizer *vConfigBox;

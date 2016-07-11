@@ -153,7 +153,7 @@ void Config::defaultConfig()
     this->GPG_SIG_ID = wxEmptyString;
 }
 
-wxString Config::gen_SPA(wxString ip_resolver_url, gpgme_wrapper * ourGPG)
+wxString Config::gen_SPA(wxString ip_resolver_url, wxString gpgEngine, wxString gpgHomeFolder)
 {
     CURLcode curl_Res;
     fko_ctx_t ctx;
@@ -208,8 +208,8 @@ wxString Config::gen_SPA(wxString ip_resolver_url, gpgme_wrapper * ourGPG)
 
     if (USE_GPG_CRYPT) {
         fko_set_spa_encryption_type(ctx, FKO_ENCRYPTION_GPG);
-        fko_set_gpg_exe(ctx, ourGPG->gpgEngine.mb_str());
-        fko_set_gpg_home_dir(ctx, ourGPG->gpgHomeFolder.mb_str());
+        fko_set_gpg_exe(ctx, gpgEngine.mb_str());
+        fko_set_gpg_home_dir(ctx, gpgHomeFolder.mb_str());
 
 
         fko_set_gpg_recipient(ctx, GPG_CRYPT_ID.mb_str());

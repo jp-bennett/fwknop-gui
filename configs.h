@@ -52,7 +52,7 @@ class Config
         void saveConfig(wxFileConfig *configFile);
         void loadConfig(wxString Nick, wxFileConfig *configFile);
         void defaultConfig();
-        wxString gen_SPA(wxString ip_resolver_url, gpgme_wrapper * ourGPG); // returns status.
+        wxString gen_SPA(wxString ip_resolver_url, wxString gpgEngine, wxString gpgHomeFolder); // returns status.
         wxString send_SPA(wxIPV4address *serverAddr);
 
     private:

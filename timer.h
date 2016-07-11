@@ -4,7 +4,7 @@
 class timerDialog : public wxDialog
 {
 public:
-  timerDialog(const wxString& title, Config *selectedConfig, wxIPV4address *serverAddr);
+  timerDialog(const wxString& title, Config *selectedConfig, wxIPV4address *serverAddr, gpgme_wrapper *ourGPG);
 private:
   wxTextCtrl *tc;
   int time_left;
@@ -12,7 +12,10 @@ private:
   wxStopWatch *main_timer;
   wxTimer *second_timer;
   Config *ourConfig;
-  wxIPV4address *ourAddr;
+  wxIPV4address ourAddr;
+  //gpgme_wrapper *ourLocalGPG;
+  wxString gpgEngine;
+  wxString gpgHomeFolder;
 
 void onClose(wxCloseEvent& event);
   enum

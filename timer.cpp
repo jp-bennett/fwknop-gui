@@ -5,11 +5,13 @@ BEGIN_EVENT_TABLE(timerDialog, wxDialog)
     EVT_TIMER(ID_SECOND_TIMER, timerDialog::tickTock)
 END_EVENT_TABLE()
 
-timerDialog::timerDialog(const wxString & title, Config *selectedConfig, wxIPV4address *serverAddr)
+timerDialog::timerDialog(const wxString & title, Config *selectedConfig, wxIPV4address *serverAddr, gpgme_wrapper *ourGPG)
        : wxDialog(NULL, -1, title, wxDefaultPosition, wxSize(250, 200))
 {
-    ourConfig = selectedConfig;  //does this actually copy the object, or just the pointer?
-    ourAddr = serverAddr;
+    gpgEngine = ourGPG->gpgEngine;
+    gpgHomeFolder = ourGPG->gpgHomeFolder;
+    ourConfig = new Config (*selectedConfig);  //Need to copy the whole object for the timer
+    ourAddr = *serverAddr;
     time_left = wxAtoi(ourConfig->SERVER_TIMEOUT);
     wxFont* font = new wxFont();
     //wxPanel *panel = new wxPanel(this, -1);
@@ -42,9 +44,9 @@ void timerDialog::tickTock(wxTimerEvent &event)
         this->EndDialog(wxID_OK);
     }
     if (time_left - (main_timer->Time()/1000) < 11  && ourConfig->KEEP_OPEN) {
-        ourConfig->gen_SPA(_(""), nullptr);
-        if (ourConfig->gen_SPA(_(""), nullptr).CmpNoCase(_("Success")) == 0) {
-            if(ourConfig->send_SPA(ourAddr).CmpNoCase(_("Knock sent successfully.")) == 0) {
+        //ourConfig->gen_SPA(_(""), ourLocalGPG);
+        if (ourConfig->gen_SPA(_(""), gpgEngine, gpgHomeFolder).CmpNoCase(_("Success")) == 0) {
+            if(ourConfig->send_SPA(&ourAddr).CmpNoCase(_("Knock sent successfully.")) == 0) {
                 main_timer->Start();
             }
         }
