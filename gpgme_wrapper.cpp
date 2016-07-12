@@ -38,22 +38,29 @@ configFile->SetPath(wxT("/"));
     }
 
 tmp_Info = gpgme_ctx_get_engine_info(gpgcon);
-if (!tmp_Info->version && (configFile->Read(wxT("show_gpg"), _("true")).CmpNoCase(_("true")) == 0)) {
-    if (wxPlatformInfo::Get().GetOperatingSystemId() == wxOS_WINDOWS) {
+if (gpgme_engine_check_version(GPGME_PROTOCOL_OpenPGP) != GPG_ERR_NO_ERROR && (configFile->Read(wxT("show_gpg"), _("true")).CmpNoCase(_("true")) == 0))
+{
+    if (wxGetOsVersion() & wxOS_WINDOWS) {
         wxRichMessageDialog dlg(NULL, _("GPG engine missing, launch browser to download?"), _("GPG engine missing"), wxYES_NO);
         dlg.ShowCheckBox("Don't show this dialog again");
         if (dlg.ShowModal() == wxID_YES) {
+            wxMessageBox(_("The download will now begin, start fwknop-gui again after the installation is complete"));
             wxLaunchDefaultBrowser(_("https://files.gpg4win.org/gpg4win-2.3.2.exe"));
+            //Perhaps end the program here
         }
         if ( dlg.IsCheckBoxChecked() ) {
             configFile->Write(wxT("show_gpg"), _("false"));
             configFile->Flush();
         }
     } else {
-        wxMessageBox(_("Couldn't initialize gpg engine, is gpg or gpg2 installed?"));
+        wxRichMessageDialog dlg(NULL, _("GPG engine missing, please download"), _("GPG engine missing"));
+        dlg.ShowCheckBox("Don't show this dialog again");
+        dlg.ShowModal();
+        if ( dlg.IsCheckBoxChecked() ) {
+            configFile->Write(wxT("show_gpg"), _("false"));
+            configFile->Flush();
+        }
     }
-
-
 }
 gpgEngineDefault = _(tmp_Info->file_name); //I know of no other way to get the default setting, so we grab it before we restore saved settings
 
