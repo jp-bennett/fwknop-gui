@@ -20,7 +20,18 @@ bool gpgme_wrapper::doInit(wxFileConfig * configFile) {
             dlg.ShowCheckBox("Don't show this dialog again");
             if (dlg.ShowModal() == wxID_YES) {
                 wxMessageBox(_("The download will now begin, start fwknop-gui again after the installation is complete"));
-                wxLaunchDefaultBrowser(_("https://files.gpg4win.org/gpg4win-2.3.2.exe")); // Should change this to the download page, not the actual download.
+                wxLaunchDefaultBrowser(_("https://files.gpg4win.org/gpg4win-latest.exe"));
+            }
+            if ( dlg.IsCheckBoxChecked() ) {
+                configFile->Write(wxT("show_gpg"), _("false"));
+                configFile->Flush();
+            }
+        } else if (wxGetOsVersion() & wxOS_MAC_OS) {
+            wxRichMessageDialog dlg(NULL, _("GPG engine missing, launch browser to download?"), _("GPG engine missing"), wxYES_NO);
+            dlg.ShowCheckBox("Don't show this dialog again");
+            if (dlg.ShowModal() == wxID_YES) {
+                wxMessageBox(_("The download will now begin, start fwknop-gui again after the installation is complete"));
+                //wxLaunchDefaultBrowser(_("https://files.gpg4win.org/gpg4win-latest.exe"));
             }
             if ( dlg.IsCheckBoxChecked() ) {
                 configFile->Write(wxT("show_gpg"), _("false"));
