@@ -98,18 +98,20 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
 
     mbar->Append(GPGMenu, _("&GPG"));
     ourGPG = new gpgme_wrapper;
+    GPGKeys = new wxArrayString;
+    GPGSigKeys = new wxArrayString;
     if (ourGPG->doInit(configFile)) {
         GPGMenu->Append(idMenugpgFolder, _("&GPG Home"), _("GPG Home Directory"));
         GPGMenu->Append(idMenugpgEngine, _("&GPG Engine"), _("GPG Engine"));
         GPGMenu->Append(idMenugpgDefaults, _("&GPG Defaults"), _("Resets GPG Engine and Folder to defaults"));
-    }
-    //ourGPG->selectHomeDir();
-    GPGKeys = new wxArrayString;
-    GPGSigKeys = new wxArrayString;
-    ourGPG->getAllKeys(GPGKeys);
-    ourGPG->getAllKeys(GPGSigKeys);
-    GPGSigKeys->Insert( _("None"), 0);
+        ourGPG->getAllKeys(GPGKeys);
+        ourGPG->getAllKeys(GPGSigKeys);
+        GPGSigKeys->Insert( _("None"), 0);
+    } else {
+        GPGKeys->Insert( _("Disabled"), 0);
+        GPGSigKeys->Insert( _("Disabled"), 0);
 
+    }
 
 
     wxMenu* helpMenu = new wxMenu(_T(""));

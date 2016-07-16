@@ -30,4 +30,11 @@ Next, unpack the fwknop-gui source, and create a build directory.  Run cmake .. 
 
 On Mac, I've had to compile both wxWidgets and libqrencode from source.
 Macports or Homebrew should suffice to install a usable toolchain to bootstrap compiling.
-
+An additional step for gpg support mac seems to be adding the following to the Info.plist file, directly after the <plist version...> line
+     <key>LSEnvironment</key>
+          <dict>
+               <key>PATH</key>
+               <string>/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/local/MacGPG2/bin:</string>
+          </dict>
+It is possible that the following will also need to be ran:
+/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -v -f fwknop-gui.app/

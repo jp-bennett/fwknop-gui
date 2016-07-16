@@ -26,25 +26,29 @@ bool gpgme_wrapper::doInit(wxFileConfig * configFile) {
                 configFile->Write(wxT("show_gpg"), _("false"));
                 configFile->Flush();
             }
-        } else if (wxGetOsVersion() & wxOS_MAC_OS) {
+        } else if (wxGetOsVersion() & wxOS_MAC) {
             wxRichMessageDialog dlg(NULL, _("GPG engine missing, launch browser to download?"), _("GPG engine missing"), wxYES_NO);
             dlg.ShowCheckBox("Don't show this dialog again");
             if (dlg.ShowModal() == wxID_YES) {
-                wxMessageBox(_("The download will now begin, start fwknop-gui again after the installation is complete"));
-                //wxLaunchDefaultBrowser(_("https://files.gpg4win.org/gpg4win-latest.exe"));
+                wxMessageBox(_("The gpgtools page will launch.  Please download and install the gpg suite and start fwknop-gui again after the installation is complete"));
+                wxLaunchDefaultBrowser(_("https://gpgtools.org/"));
             }
             if ( dlg.IsCheckBoxChecked() ) {
                 configFile->Write(wxT("show_gpg"), _("false"));
                 configFile->Flush();
             }
+            enabled = false;
+            return 0;
         } else {
-            wxRichMessageDialog dlg(NULL, _("GPG engine missing, please download"), _("GPG engine missing"));
+            wxRichMessageDialog dlg(NULL, _("GPG engine missing, please install gpg or gp2"), _("GPG engine missing"));
             dlg.ShowCheckBox("Don't show this dialog again");
             dlg.ShowModal();
             if ( dlg.IsCheckBoxChecked() ) {
                 configFile->Write(wxT("show_gpg"), _("false"));
                 configFile->Flush();
             }
+            enabled = false;
+            return 0;
         }
     }
     //We grab the default settings before loading in the saved stuff
