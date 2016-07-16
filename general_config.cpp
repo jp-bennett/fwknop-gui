@@ -31,6 +31,12 @@ gConfigDialog::gConfigDialog(wxFileConfig  *configFile)
     } else {
         countdownCheck->SetValue(false);
     }
+    debugCheck = new wxCheckBox(panel, wxID_ANY, _("Show Debug information"), wxPoint(15, 150));
+    if (configFile->Read(wxT("debug"), _("false")).CmpNoCase(_("true")) == 0 ) {
+        debugCheck->SetValue(true);
+    } else {
+        debugCheck->SetValue(false);
+    }
 
     wxButton *okButton = new wxButton(this, ID_OKButton, wxT("Ok"),
       wxDefaultPosition, wxSize(70, 30));
@@ -56,7 +62,6 @@ gConfigDialog::gConfigDialog(wxFileConfig  *configFile)
 void gConfigDialog::OnDef(wxCommandEvent &event)
 {
     url_txt->ChangeValue(wxT("https://api.ipify.org"));
-    countdownCheck->SetValue(true);
 }
 
 void gConfigDialog::OnOK(wxCommandEvent &event)
@@ -71,6 +76,11 @@ void gConfigDialog::OnOK(wxCommandEvent &event)
             privateConfigFile->Write(wxT("show_timer"), _("true"));
         } else {
             privateConfigFile->Write(wxT("show_timer"), _("false"));
+        }
+        if (debugCheck->IsChecked()) {
+            privateConfigFile->Write(wxT("debug"), _("true"));
+        } else {
+            privateConfigFile->Write(wxT("debug"), _("false"));
         }
         privateConfigFile->Flush();
         Destroy();

@@ -118,11 +118,8 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
     mbar->Append(helpMenu, _("&Help"));
 
     SetMenuBar(mbar);
-//#endif // wxUSE_MENUS
 
-
-// So this will be where we set up the gui. All the interesting things will happen in event handlers
-
+// Where we set up the gui. All the interesting things will happen in event handlers
 
 curl_global_init(CURL_GLOBAL_DEFAULT);
 wxColour *BackGround = new wxColour(233,233,233);
@@ -587,7 +584,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
     ourConfig->SERVER_IP = serverAddr.IPAddress();
 
     configFile->SetPath(wxT("/"));
-    SPA_Result = ourConfig->gen_SPA(configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")), ourGPG->gpgEngine, ourGPG->gpgHomeFolder);
+    SPA_Result = ourConfig->gen_SPA(configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")), ourGPG->gpgEngine, ourGPG->gpgHomeFolder, configFile->Read(wxT("debug"), _("false")).CmpNoCase("true") == 0);
     if (SPA_Result.CmpNoCase(wxT("Success")) != 0 ) {
         wxMessageBox(SPA_Result);
         return;
@@ -598,7 +595,7 @@ void fwknop_guiFrame::OnKnock(wxCommandEvent &event)
         wxMessageBox(SPA_Result);
         return;
     } else if ((configFile->Read(wxT("show_timer"), _("true")).CmpNoCase(_("true")) == 0) || (ourConfig->KEEP_OPEN)){
-        timerDialog *ourTimer = new timerDialog(ourConfig->NICK_NAME, ourConfig, &serverAddr, ourGPG);
+        timerDialog *ourTimer = new timerDialog(ourConfig->NICK_NAME, ourConfig, &serverAddr, ourGPG,  configFile->Read(wxT("debug"), _("false")).CmpNoCase("true") == 0);
         ourTimer->Show();
         return;
     } else {

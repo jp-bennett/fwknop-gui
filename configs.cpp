@@ -153,7 +153,7 @@ void Config::defaultConfig()
     this->GPG_SIG_ID = wxEmptyString;
 }
 
-wxString Config::gen_SPA(wxString ip_resolver_url, wxString gpgEngine, wxString gpgHomeFolder)
+wxString Config::gen_SPA(wxString ip_resolver_url, wxString gpgEngine, wxString gpgHomeFolder, bool debug)
 {
     CURLcode curl_Res;
     fko_ctx_t ctx;
@@ -190,7 +190,7 @@ wxString Config::gen_SPA(wxString ip_resolver_url, wxString gpgEngine, wxString 
     else if (this->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) == 0)
     {
         std::ostringstream oss;
-        curl_Res = curl_read(std::string(ip_resolver_url.mb_str()), oss); //Eventually make this a user definable service.
+        curl_Res = curl_read(std::string(ip_resolver_url.mb_str()), oss);
         if (curl_Res == CURLE_OK)
         {
             wxString result_tmp = wxString::FromUTF8(oss.str().c_str());
@@ -312,8 +312,6 @@ wxString Config::gen_SPA(wxString ip_resolver_url, wxString gpgEngine, wxString 
     if (fko_get_spa_data(ctx, &opts.spa_data) != FKO_SUCCESS)
         return _("Could not retrieve SPA data.");
    // if (!USE_GPG_CRYPT) {
-       // if (fko_get_spa_data(ctx, &opts.spa_data) != FKO_SUCCESS)
-          //  return _("Could not retrieve SPA data.");
         this->SPA_STRING = wxString::FromUTF8(opts.spa_data);
     /*} else {  //could retain this for libfko without gpg support
         fko_get_encoded_data(ctx, &spa_buf_ptr);
@@ -328,7 +326,12 @@ wxString Config::gen_SPA(wxString ip_resolver_url, wxString gpgEngine, wxString 
 
     }*/
 
-
+    if (debug) {
+        wxTextEntryDialog *debugMessage = new wxTextEntryDialog(NULL, _("Debug info"), _("Debug info"),  "Source IP: " + this->ACCESS_IP +"\n" + "SPA String: " + this->SPA_STRING, wxOK | wxTE_MULTILINE );
+        debugMessage->SetSize(620, 320);
+        debugMessage->ShowModal();
+        debugMessage->Destroy();
+    }
     return _("Success");
 }
 

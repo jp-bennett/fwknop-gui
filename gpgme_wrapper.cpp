@@ -1,83 +1,52 @@
 #include "gpgme_wrapper.h"
 
 bool gpgme_wrapper::doInit(wxFileConfig * configFile) {
-//do initialization code here
-//check for already loaded
-gpgme_engine_info_t tmp_Info;
-/*    dl.Load(dl.CanonicalizeName("gpgme"));
-    if (!dl.IsLoaded())
-    return 0;
+    gpgme_engine_info_t tmp_Info;
+    configFile->SetPath(wxT("/"));
 
-    //Loads all the functions into our function pointers
-    gpgme_new_ptr =                 (gpgme_error_t (*) (gpgme_ctx_t *ctx))dl.GetSymbol(wxT("gpgme_new"));
-    gpgme_strerror_ptr =            (const char * (*) (gpgme_error_t err))dl.GetSymbol(wxT("gpgme_strerror"));
-    gpgme_check_version_ptr =       (const char * (*) (const char *required_version))dl.GetSymbol(wxT("gpgme_check_version"));
-    gpgme_op_keylist_start_ptr =    (gpgme_error_t (*) (gpgme_ctx_t ctx, const char *pattern, int secret_only))dl.GetSymbol(wxT("gpgme_op_keylist_start"));
-    gpgme_op_keylist_next_ptr =     (gpgme_error_t (*) (gpgme_ctx_t ctx, gpgme_key_t *r_key))dl.GetSymbol(wxT("gpgme_op_keylist_next"));
-    gpgme_op_keylist_end_ptr =      (gpgme_error_t (*) (gpgme_ctx_t ctx))dl.GetSymbol(wxT("gpgme_op_keylist_end"));
-    gpgme_get_key_ptr =             (gpgme_error_t (*) (gpgme_ctx_t ctx, const char *fpr, gpgme_key_t *r_key, int secret))dl.GetSymbol(wxT("gpgme_get_key"));
-    gpgme_key_get_string_attr_ptr = (const char * (*) (gpgme_key_t key, gpgme_attr_t what, const void *reserved, int idx))dl.GetSymbol(wxT("gpgme_key_get_string_attr"));
-    gpgme_data_new_from_mem_ptr =   (gpgme_error_t (*) (gpgme_data_t *dh, const char *buffer, size_t size, int copy))dl.GetSymbol(wxT("gpgme_data_new_from_mem"));
-    gpgme_data_new_ptr =            (gpgme_error_t (*) (gpgme_data_t *dh))dl.GetSymbol(wxT("gpgme_data_new"));
-    gpgme_data_release_and_get_mem_ptr = (char * (*) (gpgme_data_t dh, size_t *length))dl.GetSymbol(wxT("gpgme_data_release_and_get_mem"));
-    gpgme_signers_clear_ptr =       (void (*) (gpgme_ctx_t ctx))dl.GetSymbol(wxT("gpgme_signers_clear"));
-    gpgme_signers_add_ptr =         (gpgme_error_t (*) (gpgme_ctx_t ctx, const gpgme_key_t key))dl.GetSymbol(wxT("gpgme_signers_add"));
-    gpgme_op_encrypt_ptr =          (gpgme_error_t (*) (gpgme_ctx_t ctx, gpgme_key_t recp[], gpgme_encrypt_flags_t flags, gpgme_data_t plain, gpgme_data_t cipher))dl.GetSymbol(wxT("gpgme_op_encrypt"));
-    gpgme_op_encrypt_sign_ptr =     (gpgme_error_t (*) (gpgme_ctx_t ctx, gpgme_key_t recp[], gpgme_encrypt_flags_t flags, gpgme_data_t plain, gpgme_data_t cipher))dl.GetSymbol(wxT("gpgme_op_encrypt_sign"));
-    gpgme_set_protocol_ptr =        (gpgme_error_t (*) (gpgme_ctx_t ctx, gpgme_protocol_t proto))dl.GetSymbol(wxT("gpgme_set_protocol"));
-    gpgme_set_armor_ptr =           (void (*) (gpgme_ctx_t ctx, int yes))dl.GetSymbol(wxT("gpgme_set_armor"));
-*/
-configFile->SetPath(wxT("/"));
     //Starts the actual init
     gpgme_check_version(nullptr);
-
     gpgerr = gpgme_new(&gpgcon);
     if (gpgerr != GPG_ERR_NO_ERROR) {
         wxMessageBox(_("GPG returned the error: ") + _(gpgme_strerror(gpgerr)));
         return 0;
     }
 
-tmp_Info = gpgme_ctx_get_engine_info(gpgcon);
-if (gpgme_engine_check_version(GPGME_PROTOCOL_OpenPGP) != GPG_ERR_NO_ERROR && (configFile->Read(wxT("show_gpg"), _("true")).CmpNoCase(_("true")) == 0))
-{
-    if (wxGetOsVersion() & wxOS_WINDOWS) {
-        wxRichMessageDialog dlg(NULL, _("GPG engine missing, launch browser to download?"), _("GPG engine missing"), wxYES_NO);
-        dlg.ShowCheckBox("Don't show this dialog again");
-        if (dlg.ShowModal() == wxID_YES) {
-            wxMessageBox(_("The download will now begin, start fwknop-gui again after the installation is complete"));
-            wxLaunchDefaultBrowser(_("https://files.gpg4win.org/gpg4win-2.3.2.exe"));
-            //Perhaps end the program here
-        }
-        if ( dlg.IsCheckBoxChecked() ) {
-            configFile->Write(wxT("show_gpg"), _("false"));
-            configFile->Flush();
-        }
-    } else {
-        wxRichMessageDialog dlg(NULL, _("GPG engine missing, please download"), _("GPG engine missing"));
-        dlg.ShowCheckBox("Don't show this dialog again");
-        dlg.ShowModal();
-        if ( dlg.IsCheckBoxChecked() ) {
-            configFile->Write(wxT("show_gpg"), _("false"));
-            configFile->Flush();
+    tmp_Info = gpgme_ctx_get_engine_info(gpgcon);
+    if (gpgme_engine_check_version(GPGME_PROTOCOL_OpenPGP) != GPG_ERR_NO_ERROR && (configFile->Read(wxT("show_gpg"), _("true")).CmpNoCase(_("true")) == 0))
+    {
+        if (wxGetOsVersion() & wxOS_WINDOWS) {
+            wxRichMessageDialog dlg(NULL, _("GPG engine missing, launch browser to download?"), _("GPG engine missing"), wxYES_NO);
+            dlg.ShowCheckBox("Don't show this dialog again");
+            if (dlg.ShowModal() == wxID_YES) {
+                wxMessageBox(_("The download will now begin, start fwknop-gui again after the installation is complete"));
+                wxLaunchDefaultBrowser(_("https://files.gpg4win.org/gpg4win-2.3.2.exe")); // Should change this to the download page, not the actual download.
+            }
+            if ( dlg.IsCheckBoxChecked() ) {
+                configFile->Write(wxT("show_gpg"), _("false"));
+                configFile->Flush();
+            }
+        } else {
+            wxRichMessageDialog dlg(NULL, _("GPG engine missing, please download"), _("GPG engine missing"));
+            dlg.ShowCheckBox("Don't show this dialog again");
+            dlg.ShowModal();
+            if ( dlg.IsCheckBoxChecked() ) {
+                configFile->Write(wxT("show_gpg"), _("false"));
+                configFile->Flush();
+            }
         }
     }
-}
-gpgEngineDefault = _(tmp_Info->file_name); //I know of no other way to get the default setting, so we grab it before we restore saved settings
-
-gpgEngine = configFile->Read(wxT("gpg_engine"), _(tmp_Info->file_name));
-gpgHomeFolder = configFile->Read(wxT("gpg_home_folder"), _(tmp_Info->home_dir));
-if (gpgHomeFolder.IsEmpty())
-gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), nullptr);
-else
-gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), (const char*)gpgHomeFolder.mb_str(wxConvUTF8));
-
+    //We grab the default settings before loading in the saved stuff
+    gpgEngineDefault = _(tmp_Info->file_name);
+    gpgFolderDefault = _(tmp_Info ->home_dir);
+    gpgEngine = configFile->Read(wxT("gpg_engine"), _(tmp_Info->file_name));
+    gpgHomeFolder = configFile->Read(wxT("gpg_home_folder"), _(tmp_Info->home_dir));
+    if (gpgHomeFolder.IsEmpty())
+        gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), nullptr);
+    else
+        gpgme_ctx_set_engine_info(gpgcon, GPGME_PROTOCOL_OpenPGP, (const char*)gpgEngine.mb_str(wxConvUTF8), (const char*)gpgHomeFolder.mb_str(wxConvUTF8));
     enabled = true;
     return 1;
-
-
-
-
-    //set flag true on success
 }
 
 void gpgme_wrapper::getAllKeys(wxArrayString * keys) {
@@ -89,7 +58,6 @@ void gpgme_wrapper::getAllKeys(wxArrayString * keys) {
     return;
     }
     while (gpgme_op_keylist_next(gpgcon, &tmpKey) != GPG_ERR_EOF) {
-    //gpgme_op_keylist_next_ptr(gpgcon, &tmpKey);
         if (tmpKey == 0)
             break;
         keys->Insert(_(gpgme_key_get_string_attr(tmpKey, GPGME_ATTR_KEYID, 0, 0)).Right(8), 0);
@@ -97,6 +65,8 @@ void gpgme_wrapper::getAllKeys(wxArrayString * keys) {
     gpgme_op_keylist_end(gpgcon);
 
 }
+//This function is not used, but is temporarily left for reference
+/*
 bool gpgme_wrapper::encryptAndSign(wxString encryptKey, wxString sigKey, char * plaintext, char * cipher) {
     gpgme_data_t plain_data;
     gpgme_data_t cipher_data;
@@ -156,7 +126,7 @@ bool gpgme_wrapper::encryptAndSign(wxString encryptKey, wxString sigKey, char * 
 //base64 encode before returning
 return 1;
 }
-
+*/
 bool gpgme_wrapper::selectHomeDir(wxFileConfig * configFile) {
     configFile->SetPath(wxT("/"));
     wxDirDialog dlg(NULL, _("Choose GPG directory"), gpgHomeFolder, wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
@@ -191,7 +161,7 @@ bool gpgme_wrapper::setDefaults(wxFileConfig * configFile) {
     wxMessageDialog dlg(NULL, _("Are you sure you want to reset GPG?"), _("Confirm"), wxYES_NO);
     if (dlg.ShowModal() == wxID_YES){
         gpgEngine = gpgEngineDefault;
-        gpgHomeFolder = wxEmptyString;
+        gpgHomeFolder = gpgFolderDefault;
         configFile->Write(_("gpg_engine"), gpgEngine);
         configFile->Write(_("gpg_home_folder"), wxEmptyString);
         configFile->Flush();

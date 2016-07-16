@@ -11,6 +11,7 @@ private:
   wxTextCtrl *url_txt;
   wxFileConfig *privateConfigFile;
   wxCheckBox *countdownCheck;
+  wxCheckBox *debugCheck;
 
   enum
     {

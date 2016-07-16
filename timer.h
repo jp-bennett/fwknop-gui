@@ -4,8 +4,9 @@
 class timerDialog : public wxDialog
 {
 public:
-  timerDialog(const wxString& title, Config *selectedConfig, wxIPV4address *serverAddr, gpgme_wrapper *ourGPG);
+  timerDialog(const wxString& title, Config *selectedConfig, wxIPV4address *serverAddr, gpgme_wrapper *ourGPG, bool debug);
 private:
+  bool ourDebug;
   wxTextCtrl *tc;
   int time_left;
   wxStaticText *timerText;

@@ -5,9 +5,10 @@ BEGIN_EVENT_TABLE(timerDialog, wxDialog)
     EVT_TIMER(ID_SECOND_TIMER, timerDialog::tickTock)
 END_EVENT_TABLE()
 
-timerDialog::timerDialog(const wxString & title, Config *selectedConfig, wxIPV4address *serverAddr, gpgme_wrapper *ourGPG)
+timerDialog::timerDialog(const wxString & title, Config *selectedConfig, wxIPV4address *serverAddr, gpgme_wrapper *ourGPG, bool debug)
        : wxDialog(NULL, -1, title, wxDefaultPosition, wxSize(250, 200))
 {
+    ourDebug = debug;
     gpgEngine = ourGPG->gpgEngine;
     gpgHomeFolder = ourGPG->gpgHomeFolder;
     ourConfig = new Config (*selectedConfig);  //Need to copy the whole object for the timer
@@ -45,7 +46,7 @@ void timerDialog::tickTock(wxTimerEvent &event)
     }
     if (time_left - (main_timer->Time()/1000) < 11  && ourConfig->KEEP_OPEN) {
         //ourConfig->gen_SPA(_(""), ourLocalGPG);
-        if (ourConfig->gen_SPA(_(""), gpgEngine, gpgHomeFolder).CmpNoCase(_("Success")) == 0) {
+        if (ourConfig->gen_SPA(_(""), gpgEngine, gpgHomeFolder, ourDebug).CmpNoCase(_("Success")) == 0) {
             if(ourConfig->send_SPA(&ourAddr).CmpNoCase(_("Knock sent successfully.")) == 0) {
                 main_timer->Start();
             }
