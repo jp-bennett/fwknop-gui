@@ -158,7 +158,8 @@ wxString Config::gen_SPA(wxString ip_resolver_url, wxString gpgEngine, wxString 
     CURLcode curl_Res;
     fko_ctx_t ctx;
     fwknop_options_t opts;
-    int key_len, res;
+    int key_len = 0;
+    int res;
     int hmac_str_len = 0;
     short message_type = FKO_CLIENT_TIMEOUT_NAT_ACCESS_MSG;
     short digest_type = FKO_DIGEST_SHA256;
