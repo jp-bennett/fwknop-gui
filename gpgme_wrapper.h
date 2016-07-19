@@ -3,7 +3,6 @@
 #include <gpgme.h>  //This seems strange, not sure how to handle this.  Ship with my code?
 #include <wx/dynlib.h>
 #include <wx/wx.h>
-#include <wx/base64.h>
 #include <wx/config.h>
 #include <wx/fileconf.h>
 #include <wx/richmsgdlg.h>
