@@ -20,7 +20,7 @@ wizardDialog::wizardDialog(const wxString & title)
     wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
     wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
 
-    wxStaticText *key_lbl = new wxStaticText(panel, -1, wxT("Enter text to use as key, or leave blank to use the generated key."),
+    new wxStaticText(panel, -1, wxT("Enter text to use as key, or leave blank to use the generated key."),
       wxPoint(15, 5));
 
     key_txt = new wxTextCtrl(panel, ID_KEY_TXT,

@@ -165,12 +165,12 @@ wxString Config::gen_SPA(wxString ip_resolver_url, wxString gpgEngine, wxString 
     short hmac_type = FKO_HMAC_SHA256;
     char key_str[129] = {0}, hmac_str[129] = {0};
     char spa_msg[256] = {0};
-    char spa_buf[4096] = {0};
-    char * spa_buf_ptr;
-    char crypt_buf[4096] = {0};
+//    char spa_buf[4096] = {0};
+//    char * spa_buf_ptr;
+//    char crypt_buf[4096] = {0};
     char nat_access_str[25] = {0};
-    char * hmac_buf;
-    char * spa_digest_ptr;
+//    char * hmac_buf;
+//    char * spa_digest_ptr;
 
 
     memset(&opts, 0, sizeof(fwknop_options_t));

@@ -30,6 +30,7 @@ class fwknop_guiFrame: public wxFrame
     private:
         wxBoxSizer *hbox;
         wxBoxSizer *vConfigBox;
+        wxBoxSizer *vConfigBoxSuper;
         wxBoxSizer *hIPToAllowBox;
         wxBoxSizer *hServPortBox;
         wxChoice *AllowIPChoice;

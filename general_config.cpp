@@ -17,13 +17,13 @@ gConfigDialog::gConfigDialog(wxFileConfig  *configFile)
 
     privateConfigFile->SetPath(wxT("/"));
 
-    wxStaticText *key_lbl = new wxStaticText(panel, -1, wxT("Enter URL to use to resolve the local IP."),
+    new wxStaticText(panel, -1, wxT("Enter URL to use to resolve the local IP."),
       wxPoint(15, 5));
 
     url_txt = new wxTextCtrl(panel, -1,
       configFile->Read(wxT("ip_resolver_url"), _("https://api.ipify.org")) , wxPoint(15, 30), wxSize(350, 30));
 
-    wxButton *defaultButton = new wxButton(panel, ID_DefButton, wxT("Set to Default"), wxPoint(15, 70));
+    new wxButton(panel, ID_DefButton, wxT("Set to Default"), wxPoint(15, 70));
 
     countdownCheck = new wxCheckBox(panel, wxID_ANY, _("Show server timeout popup"), wxPoint(15, 110));
     if (configFile->Read(wxT("show_timer"), _("true")).CmpNoCase(_("true")) == 0 ) {
@@ -46,7 +46,7 @@ gConfigDialog::gConfigDialog(wxFileConfig  *configFile)
 
     hbox->Add(okButton, 1);
     hbox->Add(cancelButton, 1);
-
+    //vbox->Add(key_lbl, 1);
 
     vbox->Add(panel, 1);
     vbox->Add(hbox, 0, wxALIGN_CENTER | wxTOP | wxBOTTOM, 10);

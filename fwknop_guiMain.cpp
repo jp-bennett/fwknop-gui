@@ -130,6 +130,7 @@ this->SetBackgroundColour(*BackGround);
 hbox = new wxBoxSizer(wxHORIZONTAL);
 wxBoxSizer *vListBox = new wxBoxSizer(wxVERTICAL);
 vConfigBox = new wxBoxSizer(wxVERTICAL);
+vConfigBoxSuper = new wxBoxSizer(wxVERTICAL);
 vConfigScroll = new wxScrolledWindow(this);
 
 
@@ -166,8 +167,7 @@ initCheckboxEvent = new wxCommandEvent(wxEVT_COMMAND_CHOICE_SELECTED, ID_Random)
 ourConfigList = new wxArrayString;
 ourConfig = new Config;
 
-
-wxButton *save = new wxButton(vConfigScroll, ID_SaveButton, wxT("Save Config"));
+wxButton *save = new wxButton(this, ID_SaveButton, wxT("Save Config"), wxDefaultPosition, wxSize(250, 40));
 
 
 wxStaticText *NickLbl = new wxStaticText(vConfigScroll,wxID_ANY, wxT("Nickname: "));
@@ -371,12 +371,12 @@ ourConfig->getAllConfigs(ourConfigList, configFile);
 if (!ourConfigList->IsEmpty())
     listbox->InsertItems(*ourConfigList,0);
 
-wxButton *ok = new wxButton(this, ID_KnockButton, wxT("Send Knock"));
+wxButton *ok = new wxButton(this, ID_KnockButton, wxT("Send Knock"), wxDefaultPosition, wxSize(130, 40));
 
 
 
-vListBox->Add(listbox,1,wxBOTTOM, 50);
-vListBox->Add(ok);
+vListBox->Add(listbox,1,wxBOTTOM, 5);
+vListBox->Add(ok, 0, wxALIGN_CENTER_HORIZONTAL | wxTOP);
 
 
 hbox->Add(vListBox, 0, wxEXPAND);
@@ -404,7 +404,6 @@ vConfigBox->Add(hKeepAliveBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hInternalIPBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hInternalPortBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
 vConfigBox->Add(hServCmdBox,1,wxALIGN_LEFT | wxEXPAND | wxALL,2);
-vConfigBox->Add(save,1,wxALIGN_RIGHT | wxALIGN_BOTTOM | wxEXPAND | wxALL,2);  // would like to move this outside the scroll box, but it blows up when I try
 
 OnChoice(*initMessTypeEvent);
 OnChoice(*initAllowIPEvent);
@@ -413,8 +412,10 @@ vConfigScroll->SetSizer(vConfigBox);
 vConfigScroll->FitInside(); // ask the sizer about the needed size
 vConfigScroll->SetScrollRate(5, 5);
 
-hbox->Add(vConfigScroll, 1, wxALIGN_CENTER_HORIZONTAL | wxTOP | wxEXPAND, 5);
 
+vConfigBoxSuper->Add(vConfigScroll, 1, wxALIGN_CENTER_HORIZONTAL | wxBOTTOM | wxEXPAND, 5);
+vConfigBoxSuper->Add(save, 0, wxALIGN_CENTER_HORIZONTAL);
+hbox->Add(vConfigBoxSuper, 1, wxEXPAND);
 this->SetSizer(hbox);
 
 }
