@@ -75,7 +75,8 @@ void gpgme_wrapper::getAllKeys(wxArrayString * keys) {
     while (gpgme_op_keylist_next(gpgcon, &tmpKey) != GPG_ERR_EOF) {
         if (tmpKey == 0)
             break;
-        keys->Insert(_(gpgme_key_get_string_attr(tmpKey, GPGME_ATTR_KEYID, 0, 0)).Right(8), 0);
+        //keys->Insert(_(gpgme_key_get_string_attr(tmpKey, GPGME_ATTR_KEYID, 0, 0)).Right(8), 0);
+        keys->Insert(_(tmpKey->subkeys->keyid).Right(8), 0);
     }
     gpgme_op_keylist_end(gpgcon);
 
