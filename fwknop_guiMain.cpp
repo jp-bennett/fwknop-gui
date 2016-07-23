@@ -464,7 +464,7 @@ void fwknop_guiFrame::OnSave(wxCommandEvent &event)
     ourConfig->SERVER_CMD = ServCmdTxt->GetLineText(0);
     ourConfig->DIGEST_TYPE = DigestTypeChoice->GetString(DigestTypeChoice->GetSelection()); //Change this for i18n
     ourConfig->HMAC_TYPE = HmacTypeChoice->GetString(HmacTypeChoice->GetSelection()); //Change this for i18n
-
+    ourConfig->PORTS.Replace(_(" "), _(""));
     wxString result = ourConfig->validateConfig();
     if (result.CmpNoCase(wxT("valid")) == 0)
     {
