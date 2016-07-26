@@ -725,7 +725,7 @@ void fwknop_guiFrame::OnAbout(wxCommandEvent &event)
     //wxMessageBox(msg, _("Fwknop-gui"));
     wxAboutDialogInfo aboutInfo;
     aboutInfo.SetName(_("Fwknop-gui"));
-    aboutInfo.SetVersion(_("Version 1.0"));
+    aboutInfo.SetVersion(_("Version 1.3"));
     aboutInfo.SetDescription(_("Fwknop-gui is a cross platform graphical fwknop client."));
     aboutInfo.SetWebSite(_("https://github.com/jp-bennett/fwknop-gui"));
     aboutInfo.AddDeveloper(_("Jonathan Bennett"));
