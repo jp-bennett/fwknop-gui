@@ -50,8 +50,8 @@ wxString Config::validateConfig()
         return wxT("Invalid Port string. Must look like tcp/22.");
     } else if (!(this->ACCESS_IP.CmpNoCase(wxT("Resolve IP")) == 0 ||  this->ACCESS_IP.CmpNoCase(wxT("Source IP")) == 0 || this->ACCESS_IP.CmpNoCase(wxT("Prompt IP")) == 0 || findIP.Matches(this->ACCESS_IP) )) { //if specifying ip, make sure is valid
         return wxT("Invalid IP to allow."); // Have to have a valid ip to allow, if using allow ip
-    } else if (this->MESS_TYPE.CmpNoCase(wxT("Nat Access")) == 0 && !(findIP.Matches(this->NAT_IP) && (0 < wxAtoi(NAT_PORT) && wxAtoi(NAT_PORT) < 65536))) { //NAT_IP must be a valid ip, and NAT_PORT must be a valid port
-        return wxT("Invalid NAT ip/port.");
+    } else if (this->MESS_TYPE.CmpNoCase(wxT("Nat Access")) == 0 && !(0 < wxAtoi(NAT_PORT) && wxAtoi(NAT_PORT) < 65536)) { //NAT_IP must be a valid ip, and NAT_PORT must be a valid port
+        return wxT("Invalid NAT port.");
     } else if (!(this->DIGEST_TYPE.CmpNoCase(wxT("MD5")) == 0
                 || this->DIGEST_TYPE.CmpNoCase(wxT("SHA1")) == 0
                 || this->DIGEST_TYPE.CmpNoCase(wxT("SHA256")) == 0
