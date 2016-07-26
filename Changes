@@ -1,0 +1,7 @@
+New in V1.3
+A countdown timer that keeps track of how long the port will remain open
+The ability to automatically resend knocks to keep a port open
+GPG support
+.fwknoprc import and export
+An access.conf wizard
+QR code export
