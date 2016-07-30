@@ -146,6 +146,9 @@ return 1;
 bool gpgme_wrapper::selectHomeDir(wxFileConfig * configFile) {
     configFile->SetPath(wxT("/"));
     wxDirDialog dlg(NULL, _("Choose GPG directory"), gpgHomeFolder, wxDD_DEFAULT_STYLE | wxDD_DIR_MUST_EXIST);
+    if (wxGetOsVersion() & wxOS_MAC) {
+        dlg.SetMessage(_("Choose GPG directory, use Shift+Command+.(period) to show hidden files"));
+    }
     if(dlg.ShowModal() == wxID_OK){
         gpgHomeFolder = dlg.GetPath();
         configFile->Write(_("gpg_home_folder"), gpgHomeFolder);
@@ -161,6 +164,10 @@ bool gpgme_wrapper::selectHomeDir(wxFileConfig * configFile) {
 bool gpgme_wrapper::selectEngine(wxFileConfig * configFile) {
     configFile->SetPath(wxT("/"));
     wxFileDialog dlg(NULL, _("Choose gpg or gpg2 executable"), wxEmptyString, gpgEngine);
+    if (wxGetOsVersion() & wxOS_MAC) {
+        dlg.SetMessage(_("Choose gpg or gpg2 executable, use Shift+Command+.(period) to show hidden files"));
+    }
+
     if (dlg.ShowModal() == wxID_OK){
         gpgEngine = dlg.GetPath();
         configFile->Write(_("gpg_engine"), gpgEngine);
