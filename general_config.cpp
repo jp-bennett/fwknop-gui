@@ -83,11 +83,13 @@ void gConfigDialog::OnOK(wxCommandEvent &event)
             privateConfigFile->Write(wxT("debug"), _("false"));
         }
         privateConfigFile->Flush();
+        EndModal(wxID_OK);
         Destroy();
     }
 }
 
 void gConfigDialog::OnCancel(wxCommandEvent &event)
 {
+    EndModal(wxID_CANCEL);
     Destroy();
 }

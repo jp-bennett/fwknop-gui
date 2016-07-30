@@ -42,7 +42,15 @@ set(CODE_FILES
   gpgme_wrapper.cpp
   )
 
+if(IS_APPLE)
 
+  set_source_files_properties(MacOS/fwknop-gui.icns PROPERTIES
+       MACOSX_PACKAGE_LOCATION "Resources")
+  set(CODE_FILES
+  ${CODE_FILES}
+  MacOS/fwknop-gui.icns
+  )
+endif()
 add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
   ${CODE_FILES}
   )
@@ -65,6 +73,9 @@ if(IS_WIN32)
   include_directories(${LIBQRENCODE_INCLUDE_DIR})
 endif()
 if(IS_APPLE)
+    set(MACOSX_BUNDLE_BUNDLE_NAME fwknop-gui)
+    set(MACOSX_BUNDLE_ICON_FILE fwknop-gui.icns)
+    set_property(TARGET fwknop-gui PROPERTY MACOSX_BUNDLE_INFO_PLIST "${CMAKE_CURRENT_SOURCE_DIR}/MacOS/MacOSXBundleInfo.plist.in")
     INSTALL(CODE "
     set(BU_CHMOD_BUNDLE_ITEMS ON)
     include(BundleUtilities)
