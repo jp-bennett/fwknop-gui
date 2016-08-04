@@ -54,8 +54,7 @@ endif()
 add_executable(fwknop-gui WIN32 MACOSX_BUNDLE
   ${CODE_FILES}
   )
-set_property(TARGET fwknop-gui PROPERTY CXX_STANDARD 11)
-set_property(TARGET fwknop-gui PROPERTY CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 SET_TARGET_PROPERTIES(fwknop-gui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 

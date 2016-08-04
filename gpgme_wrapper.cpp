@@ -40,7 +40,7 @@ bool gpgme_wrapper::doInit(wxFileConfig * configFile) {
             enabled = false;
             return 0;
         } else {
-            wxRichMessageDialog dlg(NULL, _("GPG engine missing, please install gpg or gp2"), _("GPG engine missing"));
+            wxRichMessageDialog dlg(NULL, _("GPG engine missing, please install gpg or gp2"), _("GPG engine missing"), wxOK|wxCENTER);
             dlg.ShowCheckBox("Don't show this dialog again");
             dlg.ShowModal();
             if ( dlg.IsCheckBoxChecked() ) {
