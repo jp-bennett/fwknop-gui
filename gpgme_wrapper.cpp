@@ -51,6 +51,8 @@ bool gpgme_wrapper::doInit(wxFileConfig * configFile) {
             return 0;
         }
     }
+    if (gpgme_engine_check_version(GPGME_PROTOCOL_OpenPGP) != GPG_ERR_NO_ERROR)
+        return 0;
     //We grab the default settings before loading in the saved stuff
     gpgEngineDefault = _(tmp_Info->file_name);
     gpgFolderDefault = _(tmp_Info ->home_dir);

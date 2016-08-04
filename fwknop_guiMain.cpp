@@ -100,10 +100,10 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
     ourGPG = new gpgme_wrapper;
     GPGKeys = new wxArrayString;
     GPGSigKeys = new wxArrayString;
+    GPGMenu->Append(idMenugpgFolder, _("&GPG Home"), _("GPG Home Directory"));
+    GPGMenu->Append(idMenugpgEngine, _("&GPG Engine"), _("GPG Engine"));
+    GPGMenu->Append(idMenugpgDefaults, _("&GPG Defaults"), _("Resets GPG Engine and Folder to defaults"));
     if (ourGPG->doInit(configFile)) {
-        GPGMenu->Append(idMenugpgFolder, _("&GPG Home"), _("GPG Home Directory"));
-        GPGMenu->Append(idMenugpgEngine, _("&GPG Engine"), _("GPG Engine"));
-        GPGMenu->Append(idMenugpgDefaults, _("&GPG Defaults"), _("Resets GPG Engine and Folder to defaults"));
         ourGPG->getAllKeys(GPGKeys);
         ourGPG->getAllKeys(GPGSigKeys);
         GPGSigKeys->Insert( _("None"), 0);
