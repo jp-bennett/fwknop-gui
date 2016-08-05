@@ -76,6 +76,16 @@ fwknop_guiFrame::fwknop_guiFrame(wxFrame *frame, const wxString& title)
     : wxFrame(frame, wxID_ANY, title, wxPoint(-1, -1), wxSize(800, 600))
 {
     configFile = new wxFileConfig (wxT("fwknop-gui"));
+    if (wxGetOsVersion() & wxOS_WINDOWS) {
+        if (configFile->GetNumberOfEntries(true) == 0) {
+            if (wxFileExists(_(wxGetHomeDir() + "\\fwknop-gui.ini"))) {
+                wxRenameFile(wxGetHomeDir() + "\\fwknop-gui.ini", wxStandardPaths::Get().GetUserConfigDir()  + "\\fwknop-gui.ini", false);
+                delete configFile;
+                configFile = new wxFileConfig (wxT("fwknop-gui"));
+            }
+        }
+    }
+
 //#if wxUSE_MENUS
     // create a menu bar
     wxMenuBar* mbar = new wxMenuBar();

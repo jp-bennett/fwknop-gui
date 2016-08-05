@@ -22,6 +22,8 @@
 #include "qr_export.h"
 #include "timer.h"
 #include "gpgme_wrapper.h"
+#include <wx/filefn.h>
+#include <wx/stdpaths.h>
 class fwknop_guiFrame: public wxFrame
 {
     public:
