@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Copyright 2016 Jonathan Bennett <jbennett@incomsystems.biz> -->
+<component type="desktop">
+  <id>fwknop-gui.desktop</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0+</project_license>
+  <name>Fwknop-gui</name>
+  <summary>Sends SPA packets</summary>
+  <description>
+    <p>
+      Fwknop-gui is a user-friendly gui interface for sending SPA packets,
+      intended to talk the fwknop server application.
+    </p>
+    <p>
+      Also supported is qr code exporting, and a rudimentary config wizard for fwknop.
+    </p>
+  </description>
+  <screenshots>
+    <screenshot type="default">
+      <image>https://incomsystems.biz/fwknop-gui/media/fwknop-gui-screenshot1.png</image>
+    </screenshot>
+    <screenshot>
+      <image>https://incomsystems.biz/fwknop-gui/media/fwknop-gui-screenshot2.png</image>
+    </screenshot>
+  </screenshots>
+  <url type="homepage">https://incomsystems.biz/fwknop-gui</url>
+  <update_contact>jbennett@incomsystems.biz</update_contact>
+</component>
