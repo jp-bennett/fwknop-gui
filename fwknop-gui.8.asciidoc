@@ -1,0 +1,36 @@
+:man source: Fwknop-gui Client
+:man manual: Fwknop-gui Client
+
+FWKNOP-GUI(8)
+=============
+
+NAME
+----
+fwknop-gui - Firewall Knock Operator Graphical User Interface
+
+
+SYNOPSIS
+--------
+*fwknop-gui*
+
+DESCRIPTION
+-----------
+*fwknop-gui* provides a graphical interface to send SPA packets.
+
+Supports AES and GPG encrypted SPA packets.
+
+BUGS
+----
+To report a bug, please visit https://github.com/jp-bennett/fwknop-gui
+
+SEE ALSO
+--------
+fwknop(8), fwknopd(8)
+
+More information on Single Packet Authorization can be found in the paper
+``Single Packet Authorization with fwknop'' available at
+'http://www.cipherdyne.org/fwknop/docs/SPA.html'.
+
+AUTHORS
+-------
+The primary developer of *fwknop-gui* is Jonathan Bennett <jbennett@incomsystems.biz>.

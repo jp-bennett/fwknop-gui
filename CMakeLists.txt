@@ -60,6 +60,29 @@ SET_TARGET_PROPERTIES(fwknop-gui PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 target_link_libraries(fwknop-gui ${wxWidgets_LIBRARIES} ${LIBFKO_LIBRARIES} ${CURL_LIBRARIES} ${LIBQRENCODE_LIBRARIES} ${GPGME_VANILLA_LIBRARIES})
 if(IS_LINUX)
+find_program(A2X_EXECUTABLE NAMES a2x a2x.py)
+set(A2X_OPTS
+  -D ${CMAKE_BINARY_DIR}
+  -d manpage
+  -f manpage
+  )
+
+set(MAN_NAMES fwknop-gui.8)
+set(MAN_FILES)
+foreach(m IN LISTS MAN_NAMES)
+  set(mf ${CMAKE_BINARY_DIR}/${m})
+  set(ms ${CMAKE_SOURCE_DIR}/${m}.asciidoc)
+  add_custom_command(OUTPUT ${mf}
+    COMMAND ${A2X_EXECUTABLE} ${A2X_OPTS} ${ms}
+    DEPENDS ${ms}
+    WORKING_DIRECTORY ${CMAKE_BINARY_DIR}
+    COMMENT "Building manpage ${mf}"
+    VERBATIM)
+  list(APPEND MAN_FILES ${mf})
+endforeach()
+
+add_custom_target(man ALL DEPENDS ${MAN_FILES})
+
   install(FILES help.html DESTINATION share/fwknop-gui)
   install(TARGETS fwknop-gui DESTINATION bin)
   install(PROGRAMS fwknop-gui.desktop DESTINATION share/applications)
