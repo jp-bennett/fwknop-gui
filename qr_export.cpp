@@ -69,9 +69,7 @@ qr_export::qr_export(const wxString & title, const Config *selectedConfig)
     ourQRImage = new wxImage(ourQR->width, ourQR->width, rawImage);
     ourQRImage->Rescale(ourQR->width * 4, ourQR->width * 4);
     bmp = wxBitmap(*ourQRImage);
-    wxPanel *qrPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(bmp.GetHeight(), bmp.GetHeight()));
-
-    sizer->Add(qrPanel);
+    sizer->SetMinSize(bmp.GetHeight(), bmp.GetHeight());
     SetSizer(sizer);
     Layout();
     this->Fit();
