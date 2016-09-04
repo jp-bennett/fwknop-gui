@@ -682,8 +682,7 @@ void fwknop_guiFrame::OnExport(wxCommandEvent &event)
 void fwknop_guiFrame::OnQR(wxCommandEvent &event)
 {
     if (ourConfig != NULL) {
-        qr_export *qr_export_dialog = new qr_export(_(""), ourConfig);
-        qr_export_dialog->Show(true);
+        qr_export *qr_export_dialog = new qr_export(ourConfig->NICK_NAME, ourConfig);
     }
 }
 

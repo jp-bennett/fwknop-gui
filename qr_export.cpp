@@ -34,6 +34,8 @@ qr_export::qr_export(const wxString & title, const Config *selectedConfig)
     QRcode *ourQR = NULL;
     wxImage *ourQRImage;
     wxString QRBuf = wxT("");
+
+    wxBoxSizer* sizer = new wxBoxSizer(wxHORIZONTAL);
     if (selectedConfig->KEY_BASE64)
     QRBuf = (wxT("KEY_BASE64:"));
     else
@@ -67,12 +69,14 @@ qr_export::qr_export(const wxString & title, const Config *selectedConfig)
     ourQRImage = new wxImage(ourQR->width, ourQR->width, rawImage);
     ourQRImage->Rescale(ourQR->width * 4, ourQR->width * 4);
     bmp = wxBitmap(*ourQRImage);
-    if (ourQR->width * 4 > 100)
-    this->SetSize(wxDefaultCoord, wxDefaultCoord, ourQR->width * 4 + 50, ourQR->width * 4 + 50);
+    wxPanel *qrPanel = new wxPanel(this, wxID_ANY, wxDefaultPosition, wxSize(bmp.GetHeight(), bmp.GetHeight()));
+
+    sizer->Add(qrPanel);
+    SetSizer(sizer);
+    Layout();
+    this->Fit();
     Centre();
-
     ShowModal();
-
     Destroy();
     QRcode_free(ourQR);
 }
@@ -82,6 +86,7 @@ void qr_export::paintEvent(wxPaintEvent & evt)
     // depending on your system you may need to look at double-buffered dcs
     wxPaintDC dc(this);
     render(dc);
+
 }
 
 void qr_export::paintNow()
@@ -93,5 +98,6 @@ void qr_export::paintNow()
 
 void qr_export::render(wxDC&  dc)
 {
-    dc.DrawBitmap( bmp, 15, 15, false );
+    dc.DrawBitmap( bmp, 0, 0, false );
+
 }
