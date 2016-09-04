@@ -1,3 +1,7 @@
+New in V1.3.1
+Changes to the QR export feature, fixes a bug on some platforms where the QR
+    code was truncated.
+
 New in V1.3
 A countdown timer that keeps track of how long the port will remain open
 The ability to automatically resend knocks to keep a port open
