@@ -15,9 +15,16 @@ SYNOPSIS
 
 DESCRIPTION
 -----------
-*fwknop-gui* provides a graphical interface to send SPA packets.
+*fwknop-gui* is a graphical user interface integrated with an Fwknop
+client that provides the ability to send SPA packets to a remote
+Fwknop server, as well as a front-end for creating and managing
+client configurations for multiple Fwknop servers.
 
-Supports AES and GPG encrypted SPA packets.
+It supports exporting saved configuration data to a QR code format
+readable by the Android client, as well as to the .fwknoprc format
+readable by the command line client.
+
+It supports AES and GPG encrypted SPA packets.
 
 BUGS
 ----
