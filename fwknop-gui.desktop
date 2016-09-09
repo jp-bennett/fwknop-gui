@@ -1,6 +1,7 @@
 [Desktop Entry]
 Name=Fwknop-gui
 GenericName=fwknop-gui
+Keywords=SPA;client
 Comment=send spa packets
 Exec=fwknop-gui
 Icon=fwknop-gui
